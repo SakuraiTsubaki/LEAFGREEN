@@ -1,0 +1,11 @@
+f2ef10d159483a3c8993337419c4aa1c5c9a9fadfb3a50bccbe8b656735a2b08  README.md
+dc0cfe7d5cb137935bbb9838a5fef60db7483767f3c8b47664c6ed915306e2d3  docs/external-events.md
+3c13d75e9599fcbd102a1fd8eba3c8a8b6fc09e782e6a0f7c110170bcddaebba  manifests/leafgreen_roms.json
+b52d6463dec2373cce665a432887c7165d7b2c264670582e3569a47be9d98cb7  patches/Pocket Monsters - Leaf Green (Japan) - Always On External Events.ips
+e5863614c9a24ef9cf5e7302702e925bb4b4a655ccb04498712aec199ef24c00  patches/Pokemon - Blattgruene Edition (Germany) - Always On External Events.ips
+eb07e7287eab40566dabc3e2db5899b6146deedd6226a7a87866c584eb428df3  patches/Pokemon - Edicion Verde Hoja (Spain) - Always On External Events.ips
+b37a144b4e6d2713d38d1551799449ce76ce24dd35ced8fd600491780d3b2c96  patches/Pokemon - Leaf Green Version (Europe) (Rev 1) - Always On External Events.ips
+a5771e4c5a50b1f85965a7f259a4c11dd0963cafc5d48cb431f46c0d2b3b3bc5  patches/Pokemon - Leaf Green Version (USA) - Always On External Events.ips
+1aad534f1d3f1ae89ff50233ab6f40c4f89a93074caa503e7e1a7931fe094baa  patches/Pokemon - Version Vert Feuille (France) - Always On External Events.ips
+4e14c2efb432277d93bf1d7ea37b629978d72712dfd724f569ed1ba9c5653ef9  patches/Pokemon - Versione Verde Foglia (Italy) - Always On External Events.ips
+73ce66a9c6ea7b7eb5f5e27045106211b928064cc38cda57b91d06a52c950afa  tools/patch_external_events.py

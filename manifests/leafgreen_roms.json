@@ -1,0 +1,247 @@
+{
+  "format_version": 1,
+  "policy": {
+    "tickets": "ship access always passes once normal Sevii ferry progression is available",
+    "altering_cave": "all nine programmed sets are merged into one permanent table and copied over all 9 selectors",
+    "trainer_tower_ereader": "not modified by this patch"
+  },
+  "altering_cave_slots": [
+    {
+      "slot": 0,
+      "species": "MAREEP",
+      "level": 7
+    },
+    {
+      "slot": 1,
+      "species": "PINECO",
+      "level": 25
+    },
+    {
+      "slot": 2,
+      "species": "HOUNDOUR",
+      "level": 14
+    },
+    {
+      "slot": 3,
+      "species": "TEDDIURSA",
+      "level": 26
+    },
+    {
+      "slot": 4,
+      "species": "AIPOM",
+      "level": 22
+    },
+    {
+      "slot": 5,
+      "species": "SHUCKLE",
+      "level": 24
+    },
+    {
+      "slot": 6,
+      "species": "STANTLER",
+      "level": 28
+    },
+    {
+      "slot": 7,
+      "species": "SMEARGLE",
+      "level": 18
+    },
+    {
+      "slot": 8,
+      "species": "ZUBAT",
+      "level": 8
+    },
+    {
+      "slot": 9,
+      "species": "ZUBAT",
+      "level": 14
+    },
+    {
+      "slot": 10,
+      "species": "ZUBAT",
+      "level": 8
+    },
+    {
+      "slot": 11,
+      "species": "ZUBAT",
+      "level": 14
+    }
+  ],
+  "roms": [
+    {
+      "file": "Pocket Monsters - Leaf Green (Japan).gba",
+      "game_code": "BPGJ",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
+      "sha256_patched": "8b964884d86ddd4593d08738854730d6251a5050a2517a856e3e5b8645f23c8a",
+      "ips_file": "Pocket Monsters - Leaf Green (Japan) - Always On External Events.ips",
+      "ips_sha256": "b52d6463dec2373cce665a432887c7165d7b2c264670582e3569a47be9d98cb7",
+      "ticket_offsets": {
+        "mystic": "0x171def",
+        "aurora": "0x171e0e"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3907ac",
+        "mareep": "0x3907e4",
+        "pineco": "0x39081c",
+        "houndour": "0x390854",
+        "teddiursa": "0x39088c",
+        "aipom": "0x3908c4",
+        "shuckle": "0x3908fc",
+        "stantler": "0x390934",
+        "smeargle": "0x39096c"
+      }
+    },
+    {
+      "file": "Pokemon - Blattgruene Edition (Germany).gba",
+      "game_code": "BPGD",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
+      "sha256_patched": "8c909ba35101ed4c41279006145f165a73d399387bdec3c1c2567cf1754675ac",
+      "ips_file": "Pokemon - Blattgruene Edition (Germany) - Always On External Events.ips",
+      "ips_sha256": "e5863614c9a24ef9cf5e7302702e925bb4b4a655ccb04498712aec199ef24c00",
+      "ticket_offsets": {
+        "mystic": "0x16689c",
+        "aurora": "0x1668bb"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c9748",
+        "mareep": "0x3c9780",
+        "pineco": "0x3c97b8",
+        "houndour": "0x3c97f0",
+        "teddiursa": "0x3c9828",
+        "aipom": "0x3c9860",
+        "shuckle": "0x3c9898",
+        "stantler": "0x3c98d0",
+        "smeargle": "0x3c9908"
+      }
+    },
+    {
+      "file": "Pokemon - Edicion Verde Hoja (Spain).gba",
+      "game_code": "BPGS",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
+      "sha256_patched": "a20f81b1d4c089ebd33b4c9a24a380baa37bc7a85b7c2e66bbb65b008c469c1e",
+      "ips_file": "Pokemon - Edicion Verde Hoja (Spain) - Always On External Events.ips",
+      "ips_sha256": "eb07e7287eab40566dabc3e2db5899b6146deedd6226a7a87866c584eb428df3",
+      "ticket_offsets": {
+        "mystic": "0x1669c8",
+        "aurora": "0x1669e7"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c4fec",
+        "mareep": "0x3c5024",
+        "pineco": "0x3c505c",
+        "houndour": "0x3c5094",
+        "teddiursa": "0x3c50cc",
+        "aipom": "0x3c5104",
+        "shuckle": "0x3c513c",
+        "stantler": "0x3c5174",
+        "smeargle": "0x3c51ac"
+      }
+    },
+    {
+      "file": "Pokemon - Leaf Green Version (Europe) (Rev 1).gba",
+      "game_code": "BPGE",
+      "revision": 1,
+      "size": 16777216,
+      "sha256_original": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
+      "sha256_patched": "a268acd714b3bebae762156dd8e0fc399281c389772e8c272e24851cc02663ec",
+      "ips_file": "Pokemon - Leaf Green Version (Europe) (Rev 1) - Always On External Events.ips",
+      "ips_sha256": "b37a144b4e6d2713d38d1551799449ce76ce24dd35ced8fd600491780d3b2c96",
+      "ticket_offsets": {
+        "mystic": "0x1669ac",
+        "aurora": "0x1669cb"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c996c",
+        "mareep": "0x3c99a4",
+        "pineco": "0x3c99dc",
+        "houndour": "0x3c9a14",
+        "teddiursa": "0x3c9a4c",
+        "aipom": "0x3c9a84",
+        "shuckle": "0x3c9abc",
+        "stantler": "0x3c9af4",
+        "smeargle": "0x3c9b2c"
+      }
+    },
+    {
+      "file": "Pokemon - Leaf Green Version (USA).gba",
+      "game_code": "BPGE",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
+      "sha256_patched": "68cd3b6d087c17d62f654f4f4f9b36dd49186c8e6bc848a6f20f74ebb5d6bfb0",
+      "ips_file": "Pokemon - Leaf Green Version (USA) - Always On External Events.ips",
+      "ips_sha256": "a5771e4c5a50b1f85965a7f259a4c11dd0963cafc5d48cb431f46c0d2b3b3bc5",
+      "ticket_offsets": {
+        "mystic": "0x166934",
+        "aurora": "0x166953"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c98fc",
+        "mareep": "0x3c9934",
+        "pineco": "0x3c996c",
+        "houndour": "0x3c99a4",
+        "teddiursa": "0x3c99dc",
+        "aipom": "0x3c9a14",
+        "shuckle": "0x3c9a4c",
+        "stantler": "0x3c9a84",
+        "smeargle": "0x3c9abc"
+      }
+    },
+    {
+      "file": "Pokemon - Version Vert Feuille (France).gba",
+      "game_code": "BPGF",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
+      "sha256_patched": "e58b4f95525c3a7b66b616a5ac440f3fc8f846a5150e2c1cbe203b0c089dcb87",
+      "ips_file": "Pokemon - Version Vert Feuille (France) - Always On External Events.ips",
+      "ips_sha256": "1aad534f1d3f1ae89ff50233ab6f40c4f89a93074caa503e7e1a7931fe094baa",
+      "ticket_offsets": {
+        "mystic": "0x166958",
+        "aurora": "0x166977"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c3c74",
+        "mareep": "0x3c3cac",
+        "pineco": "0x3c3ce4",
+        "houndour": "0x3c3d1c",
+        "teddiursa": "0x3c3d54",
+        "aipom": "0x3c3d8c",
+        "shuckle": "0x3c3dc4",
+        "stantler": "0x3c3dfc",
+        "smeargle": "0x3c3e34"
+      }
+    },
+    {
+      "file": "Pokemon - Versione Verde Foglia (Italy).gba",
+      "game_code": "BPGI",
+      "revision": 0,
+      "size": 16777216,
+      "sha256_original": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
+      "sha256_patched": "2cfee80de95b90dc251d5c48ec3f38c51e166c24354fda657c517b725310755f",
+      "ips_file": "Pokemon - Versione Verde Foglia (Italy) - Always On External Events.ips",
+      "ips_sha256": "4e14c2efb432277d93bf1d7ea37b629978d72712dfd724f569ed1ba9c5653ef9",
+      "ticket_offsets": {
+        "mystic": "0x1668dc",
+        "aurora": "0x1668fb"
+      },
+      "altering_cave_table_offsets": {
+        "zubat": "0x3c2904",
+        "mareep": "0x3c293c",
+        "pineco": "0x3c2974",
+        "houndour": "0x3c29ac",
+        "teddiursa": "0x3c29e4",
+        "aipom": "0x3c2a1c",
+        "shuckle": "0x3c2a54",
+        "stantler": "0x3c2a8c",
+        "smeargle": "0x3c2ac4"
+      }
+    }
+  ]
+}
