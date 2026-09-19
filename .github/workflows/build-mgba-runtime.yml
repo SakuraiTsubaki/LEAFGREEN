@@ -11,19 +11,19 @@ jobs:
     steps:
       - name: Install mGBA 0.10.5
         run: |
+          export DEBIAN_FRONTEND=noninteractive
           apt-get update
           apt-get install -y mgba-sdl libmgba0.10t64 mgba-common libinih1
-          command -v mgba
-          mgba --version || true
+          /usr/games/mgba --version || true
       - name: Collect runtime
         run: |
           mkdir -p artifact/lib artifact/share
-          cp "$(command -v mgba)" artifact/
+          cp /usr/games/mgba artifact/
           cp -a /usr/lib/x86_64-linux-gnu/libmgba.so.0.10* artifact/lib/
           cp -a /usr/lib/x86_64-linux-gnu/libinih.so.1* artifact/lib/ || true
           if [ -d /usr/share/mgba ]; then cp -a /usr/share/mgba artifact/share/; fi
-          ldd "$(command -v mgba)" > artifact/ldd.txt
-          mgba --version > artifact/version.txt 2>&1 || true
+          ldd /usr/games/mgba > artifact/ldd.txt
+          /usr/games/mgba --version > artifact/version.txt 2>&1 || true
       - uses: actions/upload-artifact@v4
         with:
           name: mgba-runtime-trixie
