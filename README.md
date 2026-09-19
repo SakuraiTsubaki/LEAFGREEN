@@ -2,6 +2,15 @@
 
 Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries are not stored in this repository.
 
+## Emerald item-parameter baseline
+
+All item gameplay parameters are standardized against **Pokémon Emerald** across the full
+canonical item range **0..376**. This applies to every item, not only event tickets.
+
+See `manifests/emerald_item_parameters.json` and `docs/emerald-item-parameters.md`.
+LeafGreen-specific bag containers and code addresses are treated as engine adapters so Emerald
+semantics are preserved without copying invalid raw pointers or enum values.
+
 ## Always-on external event content
 
 Current ROM patch policy:
