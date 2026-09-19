@@ -1,0 +1,31 @@
+name: Build mGBA runtime bundle
+on:
+  push:
+    branches: [test-mgba-runtime]
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install mGBA
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mgba-sdl libmgba0.10t64 mgba-common
+          command -v mgba
+          mgba --version || true
+      - name: Collect runtime
+        run: |
+          mkdir -p artifact/lib artifact/share
+          cp "$(command -v mgba)" artifact/
+          lib="$(ldd "$(command -v mgba)" | awk '/libmgba/{print $3; exit}')"
+          test -n "$lib"
+          cp "$lib" artifact/lib/
+          if [ -d /usr/share/mgba ]; then cp -a /usr/share/mgba artifact/share/; fi
+          ldd "$(command -v mgba)" > artifact/ldd.txt
+          mgba --version > artifact/version.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mgba-runtime
+          path: artifact/
+          retention-days: 1
