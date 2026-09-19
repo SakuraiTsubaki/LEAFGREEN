@@ -1,0 +1,321 @@
+{
+  "source": "pret/pokefirered src/trainer_tower_sets.c",
+  "international_floor_size": 992,
+  "international_usa_block": {
+    "rom_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
+    "offset": "0x47A488",
+    "count": 32,
+    "size": "0x7C00"
+  },
+  "notes": [
+    "The 32 declarations occur in 15-A001..15-A032 card order.",
+    "Japanese e-Reader Trainer Tower payloads use a 980-byte floor layout; international ROM floor records are 992 bytes.",
+    "Do not inject international records into Japanese ROM/save without structural and text conversion."
+  ],
+  "cards": [
+    {
+      "card_id": "15-A001",
+      "struct": "sTrainerTowerFloor_Single_4",
+      "trainer_names": [
+        "COLE"
+      ],
+      "battle_type": "single",
+      "prize": "WHITE_HERB"
+    },
+    {
+      "card_id": "15-A002",
+      "struct": "sTrainerTowerFloor_Single_7",
+      "trainer_names": [
+        "JAC"
+      ],
+      "battle_type": "single",
+      "prize": "DRAGON_SCALE"
+    },
+    {
+      "card_id": "15-A003",
+      "struct": "sTrainerTowerFloor_Single_Unused",
+      "trainer_names": [
+        "MILY"
+      ],
+      "battle_type": "single",
+      "prize": "IRON"
+    },
+    {
+      "card_id": "15-A004",
+      "struct": "sTrainerTowerFloor_Double_5",
+      "trainer_names": [
+        "JOS & ANNE"
+      ],
+      "battle_type": "double",
+      "prize": "CHOICE_BAND"
+    },
+    {
+      "card_id": "15-A005",
+      "struct": "sTrainerTowerFloor_Double_6",
+      "trainer_names": [
+        "EMY & ALEK"
+      ],
+      "battle_type": "double",
+      "prize": "CALCIUM"
+    },
+    {
+      "card_id": "15-A006",
+      "struct": "sTrainerTowerFloor_Double_2",
+      "trainer_names": [
+        "JO & HALEY"
+      ],
+      "battle_type": "double",
+      "prize": "HP_UP"
+    },
+    {
+      "card_id": "15-A007",
+      "struct": "sTrainerTowerFloor_Knockout_1",
+      "trainer_names": [
+        "JORDY",
+        "ERNEST",
+        "GABRIEL"
+      ],
+      "battle_type": "knockout",
+      "prize": "METAL_COAT"
+    },
+    {
+      "card_id": "15-A008",
+      "struct": "sTrainerTowerFloor_Knockout_2",
+      "trainer_names": [
+        "MIKE",
+        "REBECCA",
+        "NICOLAS"
+      ],
+      "battle_type": "knockout",
+      "prize": "UP_GRADE"
+    },
+    {
+      "card_id": "15-A009",
+      "struct": "sTrainerTowerFloor_Single_5",
+      "trainer_names": [
+        "JOEY"
+      ],
+      "battle_type": "single",
+      "prize": "HP_UP"
+    },
+    {
+      "card_id": "15-A010",
+      "struct": "sTrainerTowerFloor_Single_8",
+      "trainer_names": [
+        "LILY"
+      ],
+      "battle_type": "single",
+      "prize": "METAL_COAT"
+    },
+    {
+      "card_id": "15-A011",
+      "struct": "sTrainerTowerFloor_Single_2",
+      "trainer_names": [
+        "BRANDON"
+      ],
+      "battle_type": "single",
+      "prize": "UP_GRADE"
+    },
+    {
+      "card_id": "15-A012",
+      "struct": "sTrainerTowerFloor_Double_3",
+      "trainer_names": [
+        "RIC & RENE"
+      ],
+      "battle_type": "double",
+      "prize": "IRON"
+    },
+    {
+      "card_id": "15-A013",
+      "struct": "sTrainerTowerFloor_Double_1",
+      "trainer_names": [
+        "JEN & KIRA"
+      ],
+      "battle_type": "double",
+      "prize": "DRAGON_SCALE"
+    },
+    {
+      "card_id": "15-A014",
+      "struct": "sTrainerTowerFloor_Double_4",
+      "trainer_names": [
+        "ISAC & MAG"
+      ],
+      "battle_type": "double",
+      "prize": "MENTAL_HERB"
+    },
+    {
+      "card_id": "15-A015",
+      "struct": "sTrainerTowerFloor_Knockout_8",
+      "trainer_names": [
+        "CHELSEA",
+        "TRENTON",
+        "ALBERT"
+      ],
+      "battle_type": "knockout",
+      "prize": "BRIGHT_POWDER"
+    },
+    {
+      "card_id": "15-A016",
+      "struct": "sTrainerTowerFloor_Knockout_3",
+      "trainer_names": [
+        "CAMRYN",
+        "NATALIA",
+        "KATHLEEN"
+      ],
+      "battle_type": "knockout",
+      "prize": "CALCIUM"
+    },
+    {
+      "card_id": "15-A017",
+      "struct": "sTrainerTowerFloor_Single_6",
+      "trainer_names": [
+        "BRADEN"
+      ],
+      "battle_type": "single",
+      "prize": "CARBOS"
+    },
+    {
+      "card_id": "15-A018",
+      "struct": "sTrainerTowerFloor_Mixed_1",
+      "trainer_names": [
+        "ALLYSON"
+      ],
+      "battle_type": "single",
+      "prize": "KINGS_ROCK"
+    },
+    {
+      "card_id": "15-A019",
+      "struct": "sTrainerTowerFloor_Single_1",
+      "trainer_names": [
+        "ALBERTO"
+      ],
+      "battle_type": "single",
+      "prize": "UP_GRADE"
+    },
+    {
+      "card_id": "15-A020",
+      "struct": "sTrainerTowerFloor_Mixed_5",
+      "trainer_names": [
+        "KAT & KIPP"
+      ],
+      "battle_type": "double",
+      "prize": "METAL_COAT"
+    },
+    {
+      "card_id": "15-A021",
+      "struct": "sTrainerTowerFloor_Double_8",
+      "trainer_names": [
+        "GEB&MEGAN"
+      ],
+      "battle_type": "double",
+      "prize": "MENTAL_HERB"
+    },
+    {
+      "card_id": "15-A022",
+      "struct": "sTrainerTowerFloor_Double_Unused1",
+      "trainer_names": [
+        "LISA&LEAH"
+      ],
+      "battle_type": "double",
+      "prize": "ZINC"
+    },
+    {
+      "card_id": "15-A023",
+      "struct": "sTrainerTowerFloor_Knockout_7",
+      "trainer_names": [
+        "PRISCILLA",
+        "CHARLOTTE",
+        "SHANIA"
+      ],
+      "battle_type": "knockout",
+      "prize": "PROTEIN"
+    },
+    {
+      "card_id": "15-A024",
+      "struct": "sTrainerTowerFloor_Knockout_4",
+      "trainer_names": [
+        "BRENNAN",
+        "KADEN",
+        "EMANUEL"
+      ],
+      "battle_type": "knockout",
+      "prize": "DRAGON_SCALE"
+    },
+    {
+      "card_id": "15-A025",
+      "struct": "sTrainerTowerFloor_Single_3",
+      "trainer_names": [
+        "JARRETT"
+      ],
+      "battle_type": "single",
+      "prize": "METAL_COAT"
+    },
+    {
+      "card_id": "15-A026",
+      "struct": "sTrainerTowerFloor_Mixed_3",
+      "trainer_names": [
+        "OWEN"
+      ],
+      "battle_type": "single",
+      "prize": "DRAGON_SCALE"
+    },
+    {
+      "card_id": "15-A027",
+      "struct": "sTrainerTowerFloor_Mixed_2",
+      "trainer_names": [
+        "LORENZO"
+      ],
+      "battle_type": "single",
+      "prize": "PROTEIN"
+    },
+    {
+      "card_id": "15-A028",
+      "struct": "sTrainerTowerFloor_Double_Unused2",
+      "trainer_names": [
+        "NIA & CARL"
+      ],
+      "battle_type": "double",
+      "prize": "SCOPE_LENS"
+    },
+    {
+      "card_id": "15-A029",
+      "struct": "sTrainerTowerFloor_Double_7",
+      "trainer_names": [
+        "AXE & REN"
+      ],
+      "battle_type": "double",
+      "prize": "CARBOS"
+    },
+    {
+      "card_id": "15-A030",
+      "struct": "sTrainerTowerFloor_Double_Unused3",
+      "trainer_names": [
+        "KATI & GEB"
+      ],
+      "battle_type": "double",
+      "prize": "ZINC"
+    },
+    {
+      "card_id": "15-A031",
+      "struct": "sTrainerTowerFloor_Knockout_6",
+      "trainer_names": [
+        "BEN",
+        "CAMDEN",
+        "ZACKERY"
+      ],
+      "battle_type": "knockout",
+      "prize": "WHITE_HERB"
+    },
+    {
+      "card_id": "15-A032",
+      "struct": "sTrainerTowerFloor_Knockout_5",
+      "trainer_names": [
+        "MAURA",
+        "MIKAELA",
+        "FLINT"
+      ],
+      "battle_type": "knockout",
+      "prize": "UP_GRADE"
+    }
+  ]
+}

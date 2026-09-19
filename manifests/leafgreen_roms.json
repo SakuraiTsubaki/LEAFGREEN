@@ -1,9 +1,9 @@
 {
-  "format_version": 1,
+  "format_version": 2,
   "policy": {
-    "tickets": "ship access always passes once normal Sevii ferry progression is available",
-    "altering_cave": "all nine programmed sets are merged into one permanent table and copied over all 9 selectors",
-    "trainer_tower_ereader": "not modified by this patch"
+    "tickets": "MysticTicket and AuroraTicket remain real Key Items. When the normal late-game Vermilion ferry check runs, a missing ticket is silently inserted if there is room, then the normal item check decides availability.",
+    "altering_cave": "All nine programmed selector tables are replaced by one merged encounter table so every event species remains permanently available.",
+    "story": "Normal Sevii/Rainbow Pass progression and legendary one-time encounter state are unchanged."
   },
   "altering_cave_slots": [
     {
@@ -74,23 +74,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
-      "sha256_patched": "8b964884d86ddd4593d08738854730d6251a5050a2517a856e3e5b8645f23c8a",
+      "sha256_patched": "39ea366783866b4d39dda2f7e080d52bd0014ffe4d547ff10719954abc3c3f69",
       "ips_file": "Pocket Monsters - Leaf Green (Japan) - Always On External Events.ips",
-      "ips_sha256": "b52d6463dec2373cce665a432887c7165d7b2c264670582e3569a47be9d98cb7",
+      "ips_sha256": "b7c2fd85e2020f52fbf0907de20961bbc39b384720114f3ebd397ebefc825cad",
       "ticket_offsets": {
         "mystic": "0x171def",
         "aurora": "0x171e0e"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3907ac",
-        "mareep": "0x3907e4",
-        "pineco": "0x39081c",
-        "houndour": "0x390854",
-        "teddiursa": "0x39088c",
-        "aipom": "0x3908c4",
-        "shuckle": "0x3908fc",
-        "stantler": "0x390934",
-        "smeargle": "0x39096c"
+        "0": "0x3907ac",
+        "1": "0x3907e4",
+        "2": "0x39081c",
+        "3": "0x390854",
+        "4": "0x39088c",
+        "5": "0x3908c4",
+        "6": "0x3908fc",
+        "7": "0x390934",
+        "8": "0x39096c"
       }
     },
     {
@@ -99,23 +99,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
-      "sha256_patched": "8c909ba35101ed4c41279006145f165a73d399387bdec3c1c2567cf1754675ac",
+      "sha256_patched": "fcb36aa395e239b01f02a7fb8b041969b5f998802ea080de7bdb2942c57c5287",
       "ips_file": "Pokemon - Blattgruene Edition (Germany) - Always On External Events.ips",
-      "ips_sha256": "e5863614c9a24ef9cf5e7302702e925bb4b4a655ccb04498712aec199ef24c00",
+      "ips_sha256": "d418acaceba7fd3938fe0ed9b4355998a71c63a4e4509fdc7a217bdfc4fecaca",
       "ticket_offsets": {
         "mystic": "0x16689c",
         "aurora": "0x1668bb"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c9748",
-        "mareep": "0x3c9780",
-        "pineco": "0x3c97b8",
-        "houndour": "0x3c97f0",
-        "teddiursa": "0x3c9828",
-        "aipom": "0x3c9860",
-        "shuckle": "0x3c9898",
-        "stantler": "0x3c98d0",
-        "smeargle": "0x3c9908"
+        "0": "0x3c9748",
+        "1": "0x3c9780",
+        "2": "0x3c97b8",
+        "3": "0x3c97f0",
+        "4": "0x3c9828",
+        "5": "0x3c9860",
+        "6": "0x3c9898",
+        "7": "0x3c98d0",
+        "8": "0x3c9908"
       }
     },
     {
@@ -124,23 +124,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
-      "sha256_patched": "a20f81b1d4c089ebd33b4c9a24a380baa37bc7a85b7c2e66bbb65b008c469c1e",
+      "sha256_patched": "f080d50467d65b4e670c0e263fe411b9b4f254717fdc3590a7c5ebb67f83e3df",
       "ips_file": "Pokemon - Edicion Verde Hoja (Spain) - Always On External Events.ips",
-      "ips_sha256": "eb07e7287eab40566dabc3e2db5899b6146deedd6226a7a87866c584eb428df3",
+      "ips_sha256": "50ad01c0910cd9fa3e9f621f9bdf2d433937a9bb64381c2b0372e2df13029dd4",
       "ticket_offsets": {
         "mystic": "0x1669c8",
         "aurora": "0x1669e7"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c4fec",
-        "mareep": "0x3c5024",
-        "pineco": "0x3c505c",
-        "houndour": "0x3c5094",
-        "teddiursa": "0x3c50cc",
-        "aipom": "0x3c5104",
-        "shuckle": "0x3c513c",
-        "stantler": "0x3c5174",
-        "smeargle": "0x3c51ac"
+        "0": "0x3c4fec",
+        "1": "0x3c5024",
+        "2": "0x3c505c",
+        "3": "0x3c5094",
+        "4": "0x3c50cc",
+        "5": "0x3c5104",
+        "6": "0x3c513c",
+        "7": "0x3c5174",
+        "8": "0x3c51ac"
       }
     },
     {
@@ -149,23 +149,23 @@
       "revision": 1,
       "size": 16777216,
       "sha256_original": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
-      "sha256_patched": "a268acd714b3bebae762156dd8e0fc399281c389772e8c272e24851cc02663ec",
+      "sha256_patched": "2582bba2db315e3bd1e95c4b994adba35a92c7ecf60a703912bb1f9c8d323fc2",
       "ips_file": "Pokemon - Leaf Green Version (Europe) (Rev 1) - Always On External Events.ips",
-      "ips_sha256": "b37a144b4e6d2713d38d1551799449ce76ce24dd35ced8fd600491780d3b2c96",
+      "ips_sha256": "cc4108992550e612b734a9d5527640b77ac0968d25e356ad66dca9e3beb7ee34",
       "ticket_offsets": {
         "mystic": "0x1669ac",
         "aurora": "0x1669cb"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c996c",
-        "mareep": "0x3c99a4",
-        "pineco": "0x3c99dc",
-        "houndour": "0x3c9a14",
-        "teddiursa": "0x3c9a4c",
-        "aipom": "0x3c9a84",
-        "shuckle": "0x3c9abc",
-        "stantler": "0x3c9af4",
-        "smeargle": "0x3c9b2c"
+        "0": "0x3c996c",
+        "1": "0x3c99a4",
+        "2": "0x3c99dc",
+        "3": "0x3c9a14",
+        "4": "0x3c9a4c",
+        "5": "0x3c9a84",
+        "6": "0x3c9abc",
+        "7": "0x3c9af4",
+        "8": "0x3c9b2c"
       }
     },
     {
@@ -174,23 +174,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
-      "sha256_patched": "68cd3b6d087c17d62f654f4f4f9b36dd49186c8e6bc848a6f20f74ebb5d6bfb0",
+      "sha256_patched": "f218acfe996c15152cd06ed922fc06ba501198e089e2234aff5f9633bde4af6c",
       "ips_file": "Pokemon - Leaf Green Version (USA) - Always On External Events.ips",
-      "ips_sha256": "a5771e4c5a50b1f85965a7f259a4c11dd0963cafc5d48cb431f46c0d2b3b3bc5",
+      "ips_sha256": "cdf64ac3d88b301e8ac597f5a56f9a9f46fbc1a5f2eb23ff030a6965a9f833f1",
       "ticket_offsets": {
         "mystic": "0x166934",
         "aurora": "0x166953"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c98fc",
-        "mareep": "0x3c9934",
-        "pineco": "0x3c996c",
-        "houndour": "0x3c99a4",
-        "teddiursa": "0x3c99dc",
-        "aipom": "0x3c9a14",
-        "shuckle": "0x3c9a4c",
-        "stantler": "0x3c9a84",
-        "smeargle": "0x3c9abc"
+        "0": "0x3c98fc",
+        "1": "0x3c9934",
+        "2": "0x3c996c",
+        "3": "0x3c99a4",
+        "4": "0x3c99dc",
+        "5": "0x3c9a14",
+        "6": "0x3c9a4c",
+        "7": "0x3c9a84",
+        "8": "0x3c9abc"
       }
     },
     {
@@ -199,23 +199,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
-      "sha256_patched": "e58b4f95525c3a7b66b616a5ac440f3fc8f846a5150e2c1cbe203b0c089dcb87",
+      "sha256_patched": "b5ebd2c3106cd50708f46fc79373db132bb8ec2a6eb542bfbd45c6d495f0fe26",
       "ips_file": "Pokemon - Version Vert Feuille (France) - Always On External Events.ips",
-      "ips_sha256": "1aad534f1d3f1ae89ff50233ab6f40c4f89a93074caa503e7e1a7931fe094baa",
+      "ips_sha256": "e47d0507498296c95ffd76745152c48f57d41e0f8cb406d65ccb46db2e4515e8",
       "ticket_offsets": {
         "mystic": "0x166958",
         "aurora": "0x166977"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c3c74",
-        "mareep": "0x3c3cac",
-        "pineco": "0x3c3ce4",
-        "houndour": "0x3c3d1c",
-        "teddiursa": "0x3c3d54",
-        "aipom": "0x3c3d8c",
-        "shuckle": "0x3c3dc4",
-        "stantler": "0x3c3dfc",
-        "smeargle": "0x3c3e34"
+        "0": "0x3c3c74",
+        "1": "0x3c3cac",
+        "2": "0x3c3ce4",
+        "3": "0x3c3d1c",
+        "4": "0x3c3d54",
+        "5": "0x3c3d8c",
+        "6": "0x3c3dc4",
+        "7": "0x3c3dfc",
+        "8": "0x3c3e34"
       }
     },
     {
@@ -224,23 +224,23 @@
       "revision": 0,
       "size": 16777216,
       "sha256_original": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
-      "sha256_patched": "2cfee80de95b90dc251d5c48ec3f38c51e166c24354fda657c517b725310755f",
+      "sha256_patched": "d30d75830f07f1eac9579d1c110fbfbff255be45ae5c99d24056439874a234cd",
       "ips_file": "Pokemon - Versione Verde Foglia (Italy) - Always On External Events.ips",
-      "ips_sha256": "4e14c2efb432277d93bf1d7ea37b629978d72712dfd724f569ed1ba9c5653ef9",
+      "ips_sha256": "54cb8e9d4af45202a6b1696b393a6b34d7a37d47703ccce1c32e76a37dc1d5dc",
       "ticket_offsets": {
         "mystic": "0x1668dc",
         "aurora": "0x1668fb"
       },
       "altering_cave_table_offsets": {
-        "zubat": "0x3c2904",
-        "mareep": "0x3c293c",
-        "pineco": "0x3c2974",
-        "houndour": "0x3c29ac",
-        "teddiursa": "0x3c29e4",
-        "aipom": "0x3c2a1c",
-        "shuckle": "0x3c2a54",
-        "stantler": "0x3c2a8c",
-        "smeargle": "0x3c2ac4"
+        "0": "0x3c2904",
+        "1": "0x3c293c",
+        "2": "0x3c2974",
+        "3": "0x3c29ac",
+        "4": "0x3c29e4",
+        "5": "0x3c2a1c",
+        "6": "0x3c2a54",
+        "7": "0x3c2a8c",
+        "8": "0x3c2ac4"
       }
     }
   ]

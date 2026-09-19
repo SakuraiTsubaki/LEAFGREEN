@@ -4,22 +4,31 @@ Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries are
 
 ## Always-on external event content
 
-Current patch policy removes the external distribution dependency while preserving normal story progression:
+Current ROM patch policy:
 
-- **MysticTicket / Navel Rock** — the Seagallop destination check always succeeds once the normal late-game Sevii ferry menu is available.
-- **AuroraTicket / Birth Island** — same policy; Deoxys remains a normal one-time encounter controlled by the game's own encounter flags.
-- **Altering Cave** — all nine programmed selector tables are replaced with one permanent merged encounter table, so the unreleased Wonder Spot rotation is no longer required.
+- **MysticTicket / Navel Rock** — the ticket remains a real Key Item. When the normal late-game Vermilion ferry check first needs it, a missing MysticTicket is inserted into the Key Items pocket, then the normal item check is used.
+- **AuroraTicket / Birth Island** — same policy for AuroraTicket.
+- **Altering Cave** — all nine programmed selector tables are replaced by one permanent merged encounter table, removing the unreleased Wonder Spot dependency.
+- **Story compatibility** — ordinary Sevii / Rainbow Pass progression is preserved; legendary one-time encounter state is unchanged.
 - **Save compatibility** — no save-format change. Existing and new saves use the ROM-side behavior.
 
-The patch intentionally does **not** bypass the ordinary Sevii story/Rainbow Pass progression. It removes the external-event requirement, not the game's main progression.
+Supported clean ROMs: Japanese, USA, Europe Rev 1, German, French, Italian and Spanish LeafGreen.
+
+## Trainer Tower / e-Reader
+
+The Japanese games' Trainer Tower has a separate e-Reader external-data path. Research and extraction tooling is tracked separately:
+
+- `manifests/trainer_tower_cards.json` maps card IDs `15-A001`..`15-A032` to the 32 card-derived floor records in the public decompilation.
+- `tools/extract_trainer_tower_cards.py` extracts the corresponding 32 international floor records from a user-supplied clean USA LeafGreen ROM.
+- `docs/trainer-tower-ereader.md` records the Japanese 980-byte vs international 992-byte structure constraint. International data is **not** blindly injected into the Japanese ROM.
 
 ## Files
 
-- `tools/patch_external_events.py` — signature-checked patcher for the supported Japanese, North American and European LeafGreen ROM revisions.
+- `tools/patch_external_events.py` — signature-checked patcher for the seven supported clean ROMs.
 - `patches/` — IPS patches generated from the verified clean ROMs.
 - `manifests/leafgreen_roms.json` — original/patched SHA-256 values and discovered offsets.
-- `docs/external-events.md` — technical scope and source rationale.
-- `checksums/SHA256SUMS.txt` — patch and manifest/tool hashes.
+- `docs/external-events.md` — event policy and technical rationale.
+- `checksums/SHA256SUMS.txt` — repository artifact hashes.
 
 ## Usage
 
@@ -27,4 +36,4 @@ The patch intentionally does **not** bypass the ordinary Sevii story/Rainbow Pas
 python tools/patch_external_events.py "Pocket Monsters - Leaf Green (Japan).gba"
 ```
 
-The script refuses unknown or already modified ROM hashes.
+The patcher refuses unknown or already-modified ROM hashes.
