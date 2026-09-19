@@ -20,7 +20,7 @@ jobs:
           mkdir -p artifact/lib artifact/share
           cp /usr/games/mgba artifact/
           cp -a /usr/lib/x86_64-linux-gnu/libmgba.so.0.10* artifact/lib/
-          cp -a /lib/x86_64-linux-gnu/libinih.so.1* artifact/lib/
+          cp -L /lib/x86_64-linux-gnu/libinih.so.1 artifact/lib/libinih.so.1
           if [ -d /usr/share/mgba ]; then cp -a /usr/share/mgba artifact/share/; fi
           ldd /usr/games/mgba > artifact/ldd.txt
           /usr/games/mgba --version > artifact/version.txt 2>&1 || true
