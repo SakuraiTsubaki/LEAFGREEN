@@ -6,21 +6,25 @@ Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries are
 
 Current ROM patch policy:
 
-- **MysticTicket / Navel Rock** — the ticket remains a real Key Item. When the normal late-game Vermilion ferry check first needs it, a missing MysticTicket is inserted into the Key Items pocket, then the normal item check is used.
-- **AuroraTicket / Birth Island** — same policy for AuroraTicket.
+- **MysticTicket / Navel Rock** — a permanent Mystery Gift Deliveryman NPC is added to Pallet Town. Talking to him gives the real MysticTicket if it is missing and sets the same ship/received flags as the original distribution.
+- **AuroraTicket / Birth Island** — the same Pallet Town NPC gives the real AuroraTicket if it is missing and sets the original distribution flags.
+- **Original story logic stays intact** — the Vermilion ferry ticket checks are no longer forced or rewritten. The player simply owns the legitimate Key Items from the beginning area; ordinary Sevii / Rainbow Pass progression still controls when the relevant ferry menu is reachable.
 - **Altering Cave** — all nine programmed selector tables are replaced by one permanent merged encounter table, removing the unreleased Wonder Spot dependency.
-- **Story compatibility** — ordinary Sevii / Rainbow Pass progression is preserved; legendary one-time encounter state is unchanged.
 - **Save compatibility** — no save-format change. Existing and new saves use the ROM-side behavior.
+
+The added NPC uses the game's existing **Mystery Gift Deliveryman** overworld graphic and the standard localized item-obtain routine, so Japanese, English, German, French, Italian and Spanish ROMs display their own native item names/messages without new translated text.
 
 Supported clean ROMs: Japanese, USA, Europe Rev 1, German, French, Italian and Spanish LeafGreen.
 
 ## Trainer Tower / e-Reader
 
-The Japanese games' Trainer Tower has a separate e-Reader external-data path. Research and extraction tooling is tracked separately:
+Trainer Tower e-Reader data remains a separate external-data workstream:
 
-- `manifests/trainer_tower_cards.json` maps card IDs `15-A001`..`15-A032` to the 32 card-derived floor records in the public decompilation.
-- `tools/extract_trainer_tower_cards.py` extracts the corresponding 32 international floor records from a user-supplied clean USA LeafGreen ROM.
-- `docs/trainer-tower-ereader.md` records the Japanese 980-byte vs international 992-byte structure constraint. International data is **not** blindly injected into the Japanese ROM.
+- `manifests/trainer_tower_cards.json`
+- `tools/extract_trainer_tower_cards.py`
+- `docs/trainer-tower-ereader.md`
+
+The ticket-NPC change does not alter these files or Trainer Tower save sectors.
 
 ## Files
 

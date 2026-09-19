@@ -1,14 +1,14 @@
-eccaeb8102be552f186b557fb1dca9313c5fdb742be285fac7393f0263bb7703  README.md
-fe2d686478fe7bb99b96f98ccf39ef40bccbac2964c0f9c23cb8d63566c0eef0  docs/external-events.md
+587bfdf74fa8ee6c7e5628a078cbb75d4a2509c1d6f944edb613c06f550efbc5  README.md
+90e1a04a5aea51ce1afa0081e06c76f7f5912757c717fe0da7b2fbeaff776562  docs/external-events.md
 d83c83dd71de98ee1d0b77b03c85a8719701af2b7cdd3fa5ee55b66b97709c20  docs/trainer-tower-ereader.md
-2c2fa32ca3aab7e9e20f49c6678a2a4eeddaf8a27d8181dd5c154a8e8effbde1  manifests/leafgreen_roms.json
+a019f212bf65c31ec8b12d490eb43e33069c5b44f0e8c9b5fadeaba5ad37b6d4  manifests/leafgreen_roms.json
 034bbebd5917a14f31452e502e5376f5ef864cad9f95fe540d52d575021ba7e8  manifests/trainer_tower_cards.json
-b7c2fd85e2020f52fbf0907de20961bbc39b384720114f3ebd397ebefc825cad  patches/Pocket Monsters - Leaf Green (Japan) - Always On External Events.ips
-d418acaceba7fd3938fe0ed9b4355998a71c63a4e4509fdc7a217bdfc4fecaca  patches/Pokemon - Blattgruene Edition (Germany) - Always On External Events.ips
-50ad01c0910cd9fa3e9f621f9bdf2d433937a9bb64381c2b0372e2df13029dd4  patches/Pokemon - Edicion Verde Hoja (Spain) - Always On External Events.ips
-cc4108992550e612b734a9d5527640b77ac0968d25e356ad66dca9e3beb7ee34  patches/Pokemon - Leaf Green Version (Europe) (Rev 1) - Always On External Events.ips
-cdf64ac3d88b301e8ac597f5a56f9a9f46fbc1a5f2eb23ff030a6965a9f833f1  patches/Pokemon - Leaf Green Version (USA) - Always On External Events.ips
-e47d0507498296c95ffd76745152c48f57d41e0f8cb406d65ccb46db2e4515e8  patches/Pokemon - Version Vert Feuille (France) - Always On External Events.ips
-54cb8e9d4af45202a6b1696b393a6b34d7a37d47703ccce1c32e76a37dc1d5dc  patches/Pokemon - Versione Verde Foglia (Italy) - Always On External Events.ips
+4a813f14829abd0aef36f868937dc9247e8f038e781d40541979a5282786de21  patches/Pocket Monsters - Leaf Green (Japan) - Always On External Events.ips
+db63c993f052b16175496d27cec4027df32ad6aaa1cba3332bb27dcb314ca85e  patches/Pokemon - Blattgruene Edition (Germany) - Always On External Events.ips
+5748899ad9a32084974a9f074e622a5d7ecf8de785b4ff8363f421d0daa69d16  patches/Pokemon - Edicion Verde Hoja (Spain) - Always On External Events.ips
+c9a7471b675beb3fcd58ef3ebc2513b691a5e55eac47d473cc152088bea72699  patches/Pokemon - Leaf Green Version (Europe) (Rev 1) - Always On External Events.ips
+be981aea3fec4e3ddede7fbed2aa125c4069359c05c6c65ef74a59816088a03a  patches/Pokemon - Leaf Green Version (USA) - Always On External Events.ips
+68d2bdbad7dc51fee56b0c333a5ba61ef4b1be6e109ad81b71a4da32e3beb81b  patches/Pokemon - Version Vert Feuille (France) - Always On External Events.ips
+511e74a21099b4a91b4515b450405246d00fda48d11cd22c18641db566b5d00f  patches/Pokemon - Versione Verde Foglia (Italy) - Always On External Events.ips
 d7e0ed67a4002070725eb4955c50ca87e947d3dc4654c3a69a406c4b08514044  tools/extract_trainer_tower_cards.py
-539a96f9767939981fedd60237ffb505d7f9ecae244bdbf25db5fa22ad60d08d  tools/patch_external_events.py
+96048266ad839bf1effa25c11e1aa8e5f360b59b1ededaf237434098a67d1fdf  tools/patch_external_events.py

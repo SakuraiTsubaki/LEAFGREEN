@@ -2,17 +2,20 @@
 """Pokémon LeafGreen: permanent external-event availability patcher.
 
 Policy:
-- MysticTicket and AuroraTicket remain real Key Items.
-- When the late-game Vermilion ferry checks either ticket, it silently adds the missing ticket
-  (if the Key Items pocket has space) and then performs the normal item check.
+- Add a permanent Mystery Gift Deliveryman NPC to Pallet Town.
+- The NPC gives the real MysticTicket and AuroraTicket only when missing.
+- Successful/owned tickets get the same ship-enable and received flags as the original distributions.
+- The original Vermilion ferry ticket checks and normal Sevii/Rainbow Pass story progression remain unchanged.
 - Altering Cave no longer depends on the unreleased Wonder Spot rotation: all nine programmed
   selector values use the same merged encounter table containing every event species.
-- Story/Rainbow Pass progression and legendary one-time encounter state remain unchanged.
 
-The tool only accepts verified clean ROM hashes.
+The tool only accepts verified clean ROM hashes. ROM binaries are never bundled.
 """
 from __future__ import annotations
-import argparse, hashlib, json, struct
+import argparse
+import hashlib
+import json
+import struct
 from pathlib import Path
 
 SPECIES = {
@@ -46,6 +49,18 @@ SUPPORTED_SHA256 = {
     "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48": "Spain BPGS Rev 0",
 }
 
+INJECTION_OFFSET = 0x800000
+PALLET_NPC_LOCAL_ID = 4
+OBJ_EVENT_GFX_MG_DELIVERYMAN = 69
+MOVEMENT_TYPE_FACE_DOWN = 0x08
+VAR_RESULT = 0x800D
+ITEM_MYSTIC_TICKET = 370
+ITEM_AURORA_TICKET = 371
+FLAG_ENABLE_SHIP_NAVEL_ROCK = 0x084A
+FLAG_ENABLE_SHIP_BIRTH_ISLAND = 0x084B
+FLAG_RECEIVED_AURORA_TICKET = 0x02A7
+FLAG_RECEIVED_MYSTIC_TICKET = 0x02A8
+
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -69,40 +84,115 @@ def find_unique(data: bytes, pattern: bytes, label: str) -> int:
         raise RuntimeError(f"{label}: expected exactly one signature, got {len(hits)}")
     return hits[0]
 
-def find_ticket_gate(data: bytes, flag: int, item: int) -> int:
-    # Vanilla script:
-    # checkflag flag; goto_if FALSE ...; checkitem item,1; compare VAR_RESULT,FALSE; ...
-    sig = bytes((0x2B,)) + struct.pack("<H", flag) + bytes((0x06, 0x00))
+def object_prefix(local_id: int, gfx: int, x: int, y: int, elevation: int,
+                  movement: int, range_x: int, range_y: int) -> bytes:
+    return (
+        bytes((local_id, gfx, 0, 0))
+        + struct.pack("<hh", x, y)
+        + bytes((elevation, movement, (range_y << 4) | range_x, 0))
+        + struct.pack("<HH", 0, 0)
+    )
+
+def find_pallet_events(data: bytes) -> tuple[int, int]:
+    woman = object_prefix(1, 23, 3, 10, 3, 2, 1, 4)
+    fat_man = object_prefix(2, 27, 13, 17, 3, 2, 6, 2)
+    oak = object_prefix(3, 71, 10, 8, 3, 7, 1, 1)
+
     hits = []
     start = 0
     while True:
-        i = data.find(sig, start)
+        i = data.find(woman, start)
         if i < 0:
             break
         if (
-            i + 14 <= len(data)
-            and data[i+9] == 0x47
-            and data[i+10:i+12] == struct.pack("<H", item)
-            and data[i+12:i+14] == b"\x01\x00"
+            data[i + 24:i + 40] == fat_man
+            and data[i + 48:i + 64] == oak
+            and data[i + 64:i + 68] == b"\x00" * 4
+            and data[i + 68:i + 70] == struct.pack("<H", 0x02C)
         ):
             hits.append(i)
         start = i + 1
     if len(hits) != 1:
-        raise RuntimeError(f"ticket gate flag={flag:#x} item={item}: expected one hit, got {len(hits)}")
-    return hits[0]
+        raise RuntimeError(f"Pallet Town object array: expected one hit, got {len(hits)}")
 
-def ticket_item_only_routine(start: int, item: int) -> bytes:
-    # If already owned, return with VAR_RESULT=TRUE.
-    # Otherwise AddBagItem(item,1), re-check, and return with the real result.
-    ret_addr = 0x08000000 + start + 27
+    object_offset = hits[0]
+    map_events_sig = bytes((3, 3, 3, 5)) + struct.pack("<I", 0x08000000 + object_offset)
+    map_events_offset = find_unique(data, map_events_sig, "Pallet Town MapEvents")
+    return object_offset, map_events_offset
+
+def make_object(local_id: int, gfx: int, x: int, y: int, elevation: int,
+                movement: int, script_ptr: int, flag: int = 0) -> bytes:
     out = bytearray()
-    out += bytes((0x47,)) + struct.pack("<H", item) + b"\x01\x00"          # checkitem
-    out += bytes((0x21,)) + struct.pack("<H", 0x800D) + b"\x01\x00"       # compare VAR_RESULT, TRUE
-    out += bytes((0x06, 0x01)) + struct.pack("<I", ret_addr)              # goto_if_eq return
-    out += bytes((0x44,)) + struct.pack("<H", item) + b"\x01\x00"          # additem
-    out += bytes((0x47,)) + struct.pack("<H", item) + b"\x01\x00"          # checkitem
-    out += b"\x03\x03\x02\x02\x02"                                        # return / return / padding
-    assert len(out) == 31
+    out += bytes((local_id, gfx, 0, 0))
+    out += struct.pack("<hh", x, y)
+    out += bytes((elevation, movement, 0, 0))
+    out += struct.pack("<HH", 0, 0)
+    out += struct.pack("<I", script_ptr)
+    out += struct.pack("<H", flag)
+    out += b"\x00\x00"
+    assert len(out) == 24
+    return bytes(out)
+
+def assemble_ticket_script(base_offset: int) -> bytes:
+    out = bytearray()
+    labels: dict[str, int] = {}
+    fixups: list[tuple[int, str]] = []
+
+    def label(name: str) -> None:
+        labels[name] = len(out)
+
+    def jump_if(condition: int, target: str) -> None:
+        out.extend((0x06, condition))
+        fixups.append((len(out), target))
+        out.extend(b"\x00" * 4)
+
+    def checkitem(item: int) -> None:
+        out.extend((0x47,))
+        out.extend(struct.pack("<HH", item, 1))
+
+    def compare_true() -> None:
+        out.extend((0x21,))
+        out.extend(struct.pack("<HH", VAR_RESULT, 1))
+
+    def giveitem(item: int) -> None:
+        out.extend((0x1A,))
+        out.extend(struct.pack("<HH", 0x8000, item))
+        out.extend((0x1A,))
+        out.extend(struct.pack("<HH", 0x8001, 1))
+        out.extend((0x09, 0x00))  # callstd STD_OBTAIN_ITEM
+
+    def setflag(flag: int) -> None:
+        out.extend((0x29,))
+        out.extend(struct.pack("<H", flag))
+
+    out.extend((0x6A, 0x5A))  # lock, faceplayer
+
+    checkitem(ITEM_MYSTIC_TICKET)
+    compare_true()
+    jump_if(1, "mystic_flags")  # EQUAL
+    giveitem(ITEM_MYSTIC_TICKET)
+    compare_true()
+    jump_if(5, "aurora_start")  # NOT EQUAL: bag full / give failed
+    label("mystic_flags")
+    setflag(FLAG_ENABLE_SHIP_NAVEL_ROCK)
+    setflag(FLAG_RECEIVED_MYSTIC_TICKET)
+
+    label("aurora_start")
+    checkitem(ITEM_AURORA_TICKET)
+    compare_true()
+    jump_if(1, "aurora_flags")
+    giveitem(ITEM_AURORA_TICKET)
+    compare_true()
+    jump_if(5, "done")
+    label("aurora_flags")
+    setflag(FLAG_ENABLE_SHIP_BIRTH_ISLAND)
+    setflag(FLAG_RECEIVED_AURORA_TICKET)
+
+    label("done")
+    out.extend((0x6C, 0x02))  # release, end
+
+    for pos, name in fixups:
+        out[pos:pos + 4] = struct.pack("<I", 0x08000000 + base_offset + labels[name])
     return bytes(out)
 
 def patch(data: bytes) -> tuple[bytes, dict]:
@@ -113,28 +203,53 @@ def patch(data: bytes) -> tuple[bytes, dict]:
         raise RuntimeError("not a supported 16 MiB Pokémon LeafGreen ROM")
 
     out = bytearray(data)
-    mystic = find_ticket_gate(data, 0x084A, 370)
-    aurora = find_ticket_gate(data, 0x084B, 371)
-    out[mystic:mystic+31] = ticket_item_only_routine(mystic, 370)
-    out[aurora:aurora+31] = ticket_item_only_routine(aurora, 371)
+    pallet_objects, pallet_events = find_pallet_events(data)
+
+    script_offset = INJECTION_OFFSET + 4 * 24
+    script = assemble_ticket_script(script_offset)
+    injection_size = 4 * 24 + len(script)
+    if data[INJECTION_OFFSET:INJECTION_OFFSET + injection_size] != b"\xFF" * injection_size:
+        raise RuntimeError("expected unused 0xFF injection area at ROM offset 0x800000")
+
+    out[INJECTION_OFFSET:INJECTION_OFFSET + 3 * 24] = data[pallet_objects:pallet_objects + 3 * 24]
+    deliveryman = make_object(
+        PALLET_NPC_LOCAL_ID,
+        OBJ_EVENT_GFX_MG_DELIVERYMAN,
+        14, 12, 3,
+        MOVEMENT_TYPE_FACE_DOWN,
+        0x08000000 + script_offset,
+    )
+    out[INJECTION_OFFSET + 3 * 24:INJECTION_OFFSET + 4 * 24] = deliveryman
+    out[script_offset:script_offset + len(script)] = script
+
+    out[pallet_events] = 4
+    out[pallet_events + 4:pallet_events + 8] = struct.pack("<I", 0x08000000 + INJECTION_OFFSET)
 
     offsets = {}
-    for name in ["ZUBAT","MAREEP","PINECO","HOUNDOUR","TEDDIURSA","AIPOM","SHUCKLE","STANTLER","SMEARGLE"]:
+    order = ["ZUBAT","MAREEP","PINECO","HOUNDOUR","TEDDIURSA","AIPOM","SHUCKLE","STANTLER","SMEARGLE"]
+    for name in order:
         offsets[name.lower()] = find_unique(data, mon_table(name), f"Altering Cave {name}")
-    ordered = [offsets[n.lower()] for n in ["ZUBAT","MAREEP","PINECO","HOUNDOUR","TEDDIURSA","AIPOM","SHUCKLE","STANTLER","SMEARGLE"]]
-    if any(ordered[i+1] - ordered[i] != 0x38 for i in range(8)):
-        raise RuntimeError("Altering Cave tables are not in the expected contiguous 0x38-stride block")
+    ordered = [offsets[name.lower()] for name in order]
+    if any(ordered[i + 1] - ordered[i] != 0x38 for i in range(8)):
+        raise RuntimeError("Altering Cave table block is not the expected contiguous 0x38-stride layout")
 
     merged = merged_table()
     for off in ordered:
-        out[off:off+len(merged)] = merged
+        out[off:off + len(merged)] = merged
 
     report = {
         "input_sha256": digest,
         "input_variant": SUPPORTED_SHA256[digest],
         "output_sha256": sha256(out),
-        "ticket_policy": "real items; missing tickets are inserted when the normal late-game ferry check runs",
-        "ticket_offsets": {"mystic": hex(mystic), "aurora": hex(aurora)},
+        "ticket_policy": "Pallet Town Mystery Gift Deliveryman gives the real missing tickets; vanilla ferry checks remain unchanged",
+        "pallet_town": {
+            "original_object_array": hex(pallet_objects),
+            "map_events": hex(pallet_events),
+            "injected_object_array": hex(INJECTION_OFFSET),
+            "deliveryman_script": hex(script_offset),
+            "deliveryman_local_id": PALLET_NPC_LOCAL_ID,
+            "deliveryman_xy": [14, 12],
+        },
         "altering_cave_table_offsets": {k: hex(v) for k, v in offsets.items()},
     }
     return bytes(out), report

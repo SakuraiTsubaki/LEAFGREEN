@@ -1,38 +1,44 @@
 # External event policy
 
-## Ticket islands: keep the actual tickets
+## Ticket islands: Pallet Town delivery NPC
 
-The previous implementation forced the Vermilion ferry ticket-check subroutines to return TRUE.
-That is intentionally replaced by a more faithful item-based policy.
+MysticTicket and AuroraTicket remain real Key Items. The ROM no longer forces the Vermilion ferry ticket checks to pass and no longer waits until the ferry is used to inject a missing ticket.
 
-Vanilla LeafGreen checks both an event-enable flag and the corresponding Key Item:
+Instead, a fourth object event is added to **Pallet Town**:
 
-- `FLAG_ENABLE_SHIP_NAVEL_ROCK` + `ITEM_MYSTIC_TICKET`
-- `FLAG_ENABLE_SHIP_BIRTH_ISLAND` + `ITEM_AURORA_TICKET`
+- graphics: the game's existing `OBJ_EVENT_GFX_MG_DELIVERYMAN`;
+- location: `(14, 12)`, near Professor Oak's lab without replacing an existing NPC;
+- local id: `4`;
+- permanent: no hide flag;
+- interaction: uses the standard localized `STD_OBTAIN_ITEM` routine.
 
-For permanent availability, the patched check routine now does this instead:
+On interaction, the script independently handles each ticket:
 
-1. check whether the Key Item is already owned;
-2. if it is owned, return TRUE normally;
-3. if it is missing, call the normal `additem` script command for one ticket;
-4. check the bag again and return the real result.
+1. if MysticTicket is missing, attempt to give `ITEM_MYSTIC_TICKET`;
+2. if the item is present or the give succeeds, set `FLAG_ENABLE_SHIP_NAVEL_ROCK` and `FLAG_RECEIVED_MYSTIC_TICKET`;
+3. if AuroraTicket is missing, attempt to give `ITEM_AURORA_TICKET`;
+4. if the item is present or the give succeeds, set `FLAG_ENABLE_SHIP_BIRTH_ISLAND` and `FLAG_RECEIVED_AURORA_TICKET`;
+5. if the Key Items pocket is full, the failed ticket's flags are not set; talking to the NPC later retries it.
 
-This means the player **actually owns the ticket**. No duplicate ticket is added when it is already present.
-If the Key Items pocket cannot accept the ticket, the destination remains unavailable until the item can be added.
+This deliberately preserves the original ferry scripts and the ordinary Sevii / Rainbow Pass progression. The tickets can be owned early, but the main story still determines when the ferry path becomes reachable. Ho-Oh, Lugia and Deoxys one-time encounter/puzzle state is unchanged.
 
-The ordinary late-game Sevii / Rainbow Pass branch that reaches the ferry menu is not bypassed.
-Ho-Oh, Lugia and Deoxys encounter flags/puzzle state are unchanged.
+### Binary implementation
+
+For each supported clean ROM the patcher:
+
+- locates Pallet Town's three vanilla object-event records by structure/signature;
+- locates the corresponding `MapEvents` record (`3` objects / `3` warps / `3` coord events / `5` bg events);
+- copies the original three objects plus the new Deliveryman to verified unused `0xFF` space at ROM offset `0x800000`;
+- places the new ticket script immediately after the four-object array at `0x800060`;
+- changes only Pallet Town's object count (`3 -> 4`) and object-array pointer.
+
+The original Pallet Town object records are not edited in place.
 
 ## Altering Cave
 
-LeafGreen contains nine programmed Altering Cave selectors: the baseline Zubat table plus event
-tables for Mareep, Pineco, Houndour, Teddiursa, Aipom, Shuckle, Stantler and Smeargle. The
-Mystery Event script would normally advance `VAR_ALTERING_CAVE_WILD_SET`; the intended
-Wonder Spot distribution was never released.
+LeafGreen contains nine programmed Altering Cave selectors: the baseline Zubat table plus event tables for Mareep, Pineco, Houndour, Teddiursa, Aipom, Shuckle, Stantler and Smeargle. The Mystery Event script would normally advance `VAR_ALTERING_CAVE_WILD_SET`; the intended Wonder Spot distribution was never released.
 
-For permanent availability, every selector table is rewritten to the same merged 12-slot table.
-Therefore old saves with any selector value and new saves with the default selector all expose
-the same complete species pool.
+For permanent availability, every selector table is rewritten to the same merged 12-slot table. Therefore old saves with any selector value and new saves with the default selector all expose the same complete species pool.
 
 Vanilla land-slot weights are preserved: `20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1, 1`.
 
@@ -50,25 +56,22 @@ Vanilla land-slot weights are preserved: `20, 20, 10, 10, 10, 10, 5, 5, 4, 4, 1,
 
 ## Separate external-data path: Trainer Tower e-Reader
 
-Japanese FireRed/LeafGreen also accepts Trainer Tower Battle-e card data. This is not the same
-mechanism as the wireless ticket distributions or Altering Cave selector.
-
-The public decompilation contains 32 card-derived international `TrainerTowerFloor` records,
-mapped in `manifests/trainer_tower_cards.json`. Japanese e-Reader records use a 980-byte floor
-layout while international records use 992 bytes, so direct byte copying is not safe. See
-`docs/trainer-tower-ereader.md`.
+Trainer Tower Battle-e card data is a separate system and is not changed by the Pallet Town ticket NPC patch. See `docs/trainer-tower-ereader.md`.
 
 ## Reference source paths
 
 Public `pret/pokefirered` paths used to derive the patch logic:
 
+- `data/maps/PalletTown/map.json`
+- `data/maps/PalletTown/scripts.inc`
 - `data/maps/VermilionCity/scripts.inc`
 - `data/mystery_event_msg.s`
+- `data/scripts/obtain_item.inc`
+- `asm/macros/event.inc`
+- `asm/macros/map.inc`
+- `include/global.fieldmap.h`
+- `include/constants/event_objects.h`
+- `include/constants/event_object_movement.h`
+- `include/constants/flags.h`
 - `src/wild_encounter.c`
 - `src/data/wild_encounters.json`
-- `include/constants/flags.h`
-- `include/constants/vars.h`
-- `src/trainer_tower.c`
-- `src/trainer_tower_sets.c`
-- `src/cereader_tool.c`
-- `include/cereader_tool.h`
