@@ -1,78 +1,69 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "validated_on": "2026-09-21",
   "tool": "tools/expand_rom_capacity.py",
-  "scope": "seven verified clean LeafGreen ROMs",
+  "scope": "seven supplied LeafGreen ROM/SAV pairs",
   "checks": [
-    "input SHA-256 matches manifests/leafgreen_roms.json",
-    "input size is 16 MiB",
-    "output size is 32 MiB",
-    "output prefix exactly matches the entire 16 MiB input",
-    "new upper 16 MiB is entirely 0xFF"
+    "ROM input SHA-256 matches manifests/leafgreen_roms.json",
+    "ROM input size is 16 MiB",
+    "SAV size is 128 KiB",
+    "both 14-sector main save slots pass retail section signatures and checksums",
+    "Hall of Fame sectors 28..29 remain reserved",
+    "Trainer Tower/e-Reader sectors 30..31 remain reserved",
+    "ROM output size is 32 MiB",
+    "ROM output prefix exactly matches the original 16 MiB",
+    "new upper 16 MiB is entirely 0xFF",
+    "SAV is not modified"
   ],
   "results": [
     {
-      "file": "Pocket Monsters - Leaf Green (Japan).gba",
-      "input_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
-      "output_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "Japan",
+      "rom_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
+      "save_sha256": "33e1007cb3d6229fec60b95aba0d92ef8067117123f7c2bdce74bd5eed93fc75",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d"
     },
     {
-      "file": "Pokemon - Leaf Green Version (USA).gba",
-      "input_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
-      "output_32m_sha256": "60ee5f649183b87eb37c63a419afdde3f364cc028cc6995f189d74ea981fd56d",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "USA",
+      "rom_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
+      "save_sha256": "ba52f44f8756e67d521203217a2b42459aeadd6644bc8d4d3a9772824edc8494",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "60ee5f649183b87eb37c63a419afdde3f364cc028cc6995f189d74ea981fd56d"
     },
     {
-      "file": "Pokemon - Leaf Green Version (Europe) (Rev 1).gba",
-      "input_sha256": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
-      "output_32m_sha256": "08854b6702e2dcf67a2de12568d55899e179f633950e2f188cc08501c8df61d2",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "Europe Rev 1",
+      "rom_sha256": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
+      "save_sha256": "810830a841d39c83b5a46298bec10e1a9d4d2abfc266154118c56825a4e2df9e",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "08854b6702e2dcf67a2de12568d55899e179f633950e2f188cc08501c8df61d2"
     },
     {
-      "file": "Pokemon - Blattgruene Edition (Germany).gba",
-      "input_sha256": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
-      "output_32m_sha256": "8446ce466062a791560c3ead31bfa812f7788da319bd4cf98fffa812407042d5",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "Germany",
+      "rom_sha256": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
+      "save_sha256": "1cbe3d397537919e30f941cd152f8aab08c1ef31d1616ae94d9b789def43817b",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "8446ce466062a791560c3ead31bfa812f7788da319bd4cf98fffa812407042d5"
     },
     {
-      "file": "Pokemon - Version Vert Feuille (France).gba",
-      "input_sha256": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
-      "output_32m_sha256": "a02d41283ea0b98a62d1005dbe0321d23173a9d753ab9e8ddee56d15a794ffaa",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "France",
+      "rom_sha256": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
+      "save_sha256": "db312f1b0738a04726362a8a4e46e17b91c7efb6e17c487c646da2f846f54bf4",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "a02d41283ea0b98a62d1005dbe0321d23173a9d753ab9e8ddee56d15a794ffaa"
     },
     {
-      "file": "Pokemon - Versione Verde Foglia (Italy).gba",
-      "input_sha256": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
-      "output_32m_sha256": "3cdac2087f642ca846d3a4f3802689f8484ad9426ea27f7519d3ddc7b2bd4a62",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "Italy",
+      "rom_sha256": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
+      "save_sha256": "a85fd06748a8a7fd17bac00581bfc00abb94f95b10b5f7188b6bc9fce686fe82",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "3cdac2087f642ca846d3a4f3802689f8484ad9426ea27f7519d3ddc7b2bd4a62"
     },
     {
-      "file": "Pokemon - Edicion Verde Hoja (Spain).gba",
-      "input_sha256": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
-      "output_32m_sha256": "e15e650133dcb851a1f04d6a8dad45ce39ed602abb586bdba36d63a0c238aebc",
-      "input_size": 16777216,
-      "output_size": 33554432,
-      "prefix_preserved": true,
-      "expanded_region_all_ff": true
+      "region": "Spain",
+      "rom_sha256": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
+      "save_sha256": "da766fac6d0d0088c287358d53a85716e0c018f5eaabbf4b6f935fb307392239",
+      "both_main_slots_valid": true,
+      "output_32m_sha256": "e15e650133dcb851a1f04d6a8dad45ce39ed602abb586bdba36d63a0c238aebc"
     }
   ]
 }
