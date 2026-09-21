@@ -1,114 +1,145 @@
 {
-  "schema_version": 1,
-  "purpose": "Generation 10 readiness before form-change mechanics.",
+  "schema_version": 2,
+  "purpose": "Generation 10 readiness derived from the actual LeafGreen ROM/SAV pairs before form-change work.",
   "policy": {
     "form_change_mechanics": "deferred",
     "existing_ids": "preserve",
     "extension_ids": "append-only",
-    "current_rom_size_bytes": 16777216,
-    "expanded_rom_size_bytes": 33554432,
-    "expansion_fill_byte": "0xFF",
-    "binary_support_status": "capacity contract and physical ROM expansion only; gameplay tables are not yet relocated"
+    "rom_input_size_bytes": 16777216,
+    "rom_expanded_size_bytes": 33554432,
+    "save_size_bytes": 131072,
+    "save_physical_size_policy": "preserve 128 KiB FLASH1M layout"
   },
   "references": {
     "leafgreen_source": {
       "repository": "pret/pokefirered",
       "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788"
     },
-    "pkhex_reference": {
-      "repository": "kwsch/PKHeX",
-      "commit": "8ad201e80244f630ab5a46922ab72fb79c5ad4f4",
-      "via_repository": "SakuraiTsubaki/EMERALD"
+    "pair_audit": "manifests/rom_save_audit.json"
+  },
+  "rom_evidence": {
+    "verified_pairs": 7,
+    "all_clean_roms_size_bytes": 16777216,
+    "all_contain_flash_signature": "FLASH1M_V103",
+    "linker_rom_window": {
+      "origin": "0x08000000",
+      "length": "32M"
+    },
+    "common_all_ff_ranges_inside_original_16m": [
+      ["0x719B88", "0xC00000"],
+      ["0xEB244C", "0xF00000"],
+      ["0xFDFFFF", "0x1000000"]
+    ],
+    "expanded_half": {
+      "file_range": ["0x1000000", "0x2000000"],
+      "rom_address_range": ["0x09000000", "0x0A000000"],
+      "initial_fill": "0xFF",
+      "use": "relocated data tables and assets; code placement requires branch/range review"
     }
   },
-  "observed_reference_maxima": {
-    "species": {
-      "max_id": 1025,
-      "name": "Pecharunt"
+  "save_evidence": {
+    "sector_size": 4096,
+    "sector_data_size": 3968,
+    "sector_count": 32,
+    "main_slot_1": "sectors 0..13",
+    "main_slot_2": "sectors 14..27",
+    "hall_of_fame": "sectors 28..29",
+    "trainer_tower_ereader": "sectors 30..31",
+    "spare_physical_sectors": 0,
+    "logical_payload": {
+      "SaveBlock2_bytes": 3876,
+      "SaveBlock1_bytes": 15720,
+      "PokemonStorage_bytes": 33744,
+      "bytes_per_main_slot": 53340,
+      "allocated_data_bytes_per_main_slot": 55552,
+      "tail_slack_bytes_per_main_slot": 2212
     },
-    "moves": {
-      "max_id": 920,
-      "name": "Nihil Light"
-    },
-    "abilities": {
-      "max_id": 310,
-      "name": "Poison Puppeteer"
-    },
-    "items": {
-      "max_id": 2684,
-      "scope": "PKHeX Z-A Mega Dimension ceiling"
+    "tail_slack_policy": "not used in phase 1 because increasing per-section checksum sizes would make unmodified legacy saves fail validation without a migration loader",
+    "phase1_reclaimable_existing_fields": {
+      "SaveBlock2_filler_B20": {
+        "offset": "0xB20",
+        "bytes": 1024,
+        "zero_in_all_7_active_samples": true,
+        "planned_layout": {
+          "extended_seen_bits": 4096,
+          "extended_seen_bytes": 512,
+          "extended_owned_bits": 4096,
+          "extended_owned_bytes": 512
+        }
+      },
+      "SaveBlock1_unused_348C": {
+        "offset": "0x348C",
+        "bytes": 400,
+        "zero_in_all_7_active_samples": true,
+        "status": "reserved for future audited extension metadata"
+      },
+      "SaveBlock1_unused_3A94": {
+        "offset": "0x3A94",
+        "bytes": 64,
+        "zero_in_all_7_active_samples": true,
+        "status": "reserved"
+      },
+      "SaveBlock1_unused_3D24": {
+        "offset": "0x3D24",
+        "bytes": 16,
+        "zero_in_all_7_active_samples": true,
+        "status": "reserved"
+      },
+      "SaveBlock1_unused_632": {
+        "offset": "0x632",
+        "bytes": 6,
+        "zero_in_all_7_active_samples": true,
+        "status": "reserved"
+      }
     }
   },
-  "capacity_contract": {
+  "native_identifier_storage": {
     "species": {
-      "max_id": 4095,
-      "entries": 4096,
-      "id_bits": 16,
-      "native_id_storage": "u16",
-      "implementation": "relocate/expand species-indexed tables"
+      "boxed_pokemon": "u16",
+      "battle_pokemon": "u16",
+      "save_id_ceiling": 65535,
+      "phase1_pokedex_capacity": 4096,
+      "reason_for_phase1_pokedex_capacity": "two 4096-bit fields exactly fit the verified 0x400-byte SaveBlock2 filler"
     },
     "moves": {
-      "max_id": 2047,
-      "entries": 2048,
-      "id_bits": 16,
-      "native_id_storage": "u16",
-      "native_blockers": [
-        "LevelUpMove.move is a 9-bit bitfield and must be replaced before IDs above 511 are materialized"
-      ]
-    },
-    "abilities": {
-      "max_id": 1023,
-      "entries": 1024,
-      "id_bits": 16,
-      "required_runtime_storage": "u16",
-      "native_blockers": [
-        "BattlePokemon.ability is u8",
-        "SpeciesInfo.abilities[2] stores u8 IDs",
-        "Box Pokemon abilityNum is one bit and only selects two native ability slots"
-      ]
+      "pokemon_move_slots": "u16",
+      "save_id_ceiling": 65535,
+      "blocker": "LevelUpMove.move is a 9-bit field; IDs above 511 require a new learnset encoding"
     },
     "items": {
-      "max_id": 8191,
-      "entries": 8192,
-      "id_bits": 16,
-      "native_id_storage": "u16",
-      "implementation": "relocate/expand item-indexed tables and bag legality/crosswalks"
+      "held_item": "u16",
+      "bag_item_id": "u16",
+      "save_id_ceiling": 65535,
+      "rom_table_capacity": "pending table relocation audit"
+    },
+    "abilities": {
+      "battle_ability": "u8",
+      "species_ability_ids": "u8[2]",
+      "boxed_ability_selector": "1 bit",
+      "status": "requires widening/interoperability design before modern ability import"
     },
     "types": {
-      "max_id": 31,
-      "entries": 32,
-      "id_bits": 8,
-      "native_id_storage": "u8",
-      "implementation": "expand type tables and UI assumptions; no form mechanics required"
+      "species_type_ids": "u8[2]",
+      "move_type": "u8",
+      "status": "table/UI expansion only; physical save growth not required"
     },
     "move_effects": {
-      "max_id": 1023,
-      "entries": 1024,
-      "id_bits": 16,
-      "required_runtime_storage": "u16",
-      "native_blockers": [
-        "BattleMove.effect is u8"
-      ]
+      "battle_move_effect": "u8",
+      "status": "requires widened runtime representation if effects exceed 255"
     },
-    "evolution_methods": {
-      "max_id": 511,
-      "entries": 512,
-      "id_bits": 16,
-      "native_id_storage": "u16"
-    },
-    "local_form_index": {
-      "max_id": 255,
-      "entries": 256,
-      "id_bits": 8,
-      "status": "reserved only; form-change mechanics are deferred"
+    "evolution": {
+      "method": "u16",
+      "parameter": "u16",
+      "target_species": "u16"
     }
   },
-  "first_binary_phase": [
-    "expand supported 16 MiB ROM images to 32 MiB with 0xFF in the new half",
-    "inventory every species/move/ability/item/type/evolution table and pointer fan-out",
-    "widen 8-bit ability and move-effect runtime paths before importing modern IDs",
-    "replace the native 9-bit level-up move encoding",
-    "relocate append-only tables into the expanded ROM region",
-    "design expanded Pokédex/save bitfields without breaking original save compatibility"
+  "phase1_order": [
+    "validate every ROM together with its 128 KiB save",
+    "keep the save physical size at 128 KiB",
+    "reserve SaveBlock2 filler_B20 as the 4096-species extended seen/owned Pokedex block",
+    "inventory and relocate species/move/item/ability/type/evolution tables into the 32 MiB ROM space",
+    "replace the 9-bit level-up move encoding before importing move IDs above 511",
+    "design ability-slot widening without changing BoxPokemon size or breaking old saves",
+    "only after the expansion layer is stable, resume form-change mechanics"
   ]
 }
