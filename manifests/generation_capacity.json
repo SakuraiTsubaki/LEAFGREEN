@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "purpose": "Generation 10 readiness before form-change mechanics.",
+  "policy": {
+    "form_change_mechanics": "deferred",
+    "existing_ids": "preserve",
+    "extension_ids": "append-only",
+    "current_rom_size_bytes": 16777216,
+    "expanded_rom_size_bytes": 33554432,
+    "expansion_fill_byte": "0xFF",
+    "binary_support_status": "capacity contract and physical ROM expansion only; gameplay tables are not yet relocated"
+  },
+  "references": {
+    "leafgreen_source": {
+      "repository": "pret/pokefirered",
+      "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788"
+    },
+    "pkhex_reference": {
+      "repository": "kwsch/PKHeX",
+      "commit": "8ad201e80244f630ab5a46922ab72fb79c5ad4f4",
+      "via_repository": "SakuraiTsubaki/EMERALD"
+    }
+  },
+  "observed_reference_maxima": {
+    "species": {
+      "max_id": 1025,
+      "name": "Pecharunt"
+    },
+    "moves": {
+      "max_id": 920,
+      "name": "Nihil Light"
+    },
+    "abilities": {
+      "max_id": 310,
+      "name": "Poison Puppeteer"
+    },
+    "items": {
+      "max_id": 2684,
+      "scope": "PKHeX Z-A Mega Dimension ceiling"
+    }
+  },
+  "capacity_contract": {
+    "species": {
+      "max_id": 4095,
+      "entries": 4096,
+      "id_bits": 16,
+      "native_id_storage": "u16",
+      "implementation": "relocate/expand species-indexed tables"
+    },
+    "moves": {
+      "max_id": 2047,
+      "entries": 2048,
+      "id_bits": 16,
+      "native_id_storage": "u16",
+      "native_blockers": [
+        "LevelUpMove.move is a 9-bit bitfield and must be replaced before IDs above 511 are materialized"
+      ]
+    },
+    "abilities": {
+      "max_id": 1023,
+      "entries": 1024,
+      "id_bits": 16,
+      "required_runtime_storage": "u16",
+      "native_blockers": [
+        "BattlePokemon.ability is u8",
+        "SpeciesInfo.abilities[2] stores u8 IDs",
+        "Box Pokemon abilityNum is one bit and only selects two native ability slots"
+      ]
+    },
+    "items": {
+      "max_id": 8191,
+      "entries": 8192,
+      "id_bits": 16,
+      "native_id_storage": "u16",
+      "implementation": "relocate/expand item-indexed tables and bag legality/crosswalks"
+    },
+    "types": {
+      "max_id": 31,
+      "entries": 32,
+      "id_bits": 8,
+      "native_id_storage": "u8",
+      "implementation": "expand type tables and UI assumptions; no form mechanics required"
+    },
+    "move_effects": {
+      "max_id": 1023,
+      "entries": 1024,
+      "id_bits": 16,
+      "required_runtime_storage": "u16",
+      "native_blockers": [
+        "BattleMove.effect is u8"
+      ]
+    },
+    "evolution_methods": {
+      "max_id": 511,
+      "entries": 512,
+      "id_bits": 16,
+      "native_id_storage": "u16"
+    },
+    "local_form_index": {
+      "max_id": 255,
+      "entries": 256,
+      "id_bits": 8,
+      "status": "reserved only; form-change mechanics are deferred"
+    }
+  },
+  "first_binary_phase": [
+    "expand supported 16 MiB ROM images to 32 MiB with 0xFF in the new half",
+    "inventory every species/move/ability/item/type/evolution table and pointer fan-out",
+    "widen 8-bit ability and move-effect runtime paths before importing modern IDs",
+    "replace the native 9-bit level-up move encoding",
+    "relocate append-only tables into the expanded ROM region",
+    "design expanded Pokédex/save bitfields without breaking original save compatibility"
+  ]
+}
