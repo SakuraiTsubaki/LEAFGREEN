@@ -4,36 +4,72 @@
 
 Form-change mechanics remain deferred.
 
-Generation expansion is based on the seven supplied LeafGreen ROM/SAV pairs, not on capacity guesses. The project keeps the retail 128 KiB FLASH1M save layout and expands the ROM to the 32 MiB address window already declared by the pinned `pret/pokefirered` linker scripts.
+Generation expansion is based on the seven supplied LeafGreen ROM/SAV pairs, not on capacity guesses. The project keeps the retail 128 KiB FLASH1M save layout and expands the ROM only to the maximum standard GBA/LeafGreen directly addressable size: **32 MiB**.
 
 Evidence is recorded in:
 
 - `manifests/rom_save_audit.json`
 - `manifests/generation_capacity.json`
+- `manifests/rom_size_limit_probe.json`
 
-## ROM evidence
+## ROM hard limit
 
-All seven clean ROMs are exactly 16 MiB and contain `FLASH1M_V103`.
+The seven clean ROMs are exactly 16 MiB.
 
-The seven-ROM byte comparison found these common all-`0xFF` ranges inside the original 16 MiB:
-
-- `0x719B88..0xBFFFFF`
-- `0xEB244C..0xEFFFFF`
-- `0xFDFFFF..0xFFFFFF`
-
-The current external-event patch already uses a small part of the first common region at `0x800000`, so future large tables should not assume the original free space is untouched.
-
-The pinned linker scripts define:
+The pinned `pret/pokefirered` linker script defines:
 
 - ROM origin: `0x08000000`
 - ROM length: `32M`
 
-Therefore the physical expansion target is 32 MiB. The new upper half is initially `0xFF`:
+mGBA's current GBA memory model defines each Game Pak ROM window as `0x02000000` bytes (32 MiB). ROM0, ROM1 and ROM2 are three waitstate views of the same ROM data:
+
+- ROM0: `0x08000000..0x09FFFFFF`
+- ROM1: `0x0A000000..0x0BFFFFFF`
+- ROM2: `0x0C000000..0x0DFFFFFF`
+
+They are **not 96 MiB of independent storage**. Cartridge reads mask the address into the same 32 MiB ROM buffer.
+
+For ordinary non-Matrix ROMs such as LeafGreen `BPG*`, mGBA also clamps ROM files larger than 32 MiB to the first 32 MiB when loading.
+
+Therefore:
+
+**32 MiB is the hard limit for a standard LeafGreen ROM image.**
+
+The usable unique address range is:
+
+- file offsets: `0x0000000..0x1FFFFFF`
+- CPU ROM addresses: `0x08000000..0x09FFFFFF`
+
+The original 16 MiB occupies the lower half. The new 16 MiB occupies:
 
 - file offsets: `0x1000000..0x1FFFFFF`
-- ROM addresses: `0x09000000..0x09FFFFFF`
+- CPU addresses: `0x09000000..0x09FFFFFF`
 
-Relocated data tables and assets should prefer this upper half. Code placed there still requires ARM/Thumb branch-range review or veneers; 32 MiB space alone does not make every direct branch valid.
+The seven-ROM comparison also found common all-`0xFF` regions inside the original 16 MiB, but the external-event patch already uses part of that space at `0x800000`.
+
+## Oversize probe
+
+A real Japanese LeafGreen ROM was padded and hashed at four file sizes:
+
+- 32 MiB
+- 64 MiB
+- 96 MiB
+- 128 MiB
+
+All four files can physically exist on disk. However, only the first 32 MiB are uniquely addressable with standard LeafGreen/GBA mapping.
+
+The 64/96/128 MiB files therefore prove only that a host filesystem can hold a larger file. Their extra bytes do not create additional standard GBA ROM addresses.
+
+Using more than 32 MiB would require a deliberate **custom mapper or bank-switching design**, plus matching emulator/flashcart support. That is a different architecture and is not treated as ordinary LeafGreen compatibility.
+
+Reproduce the file-size probe with:
+
+```sh
+python tools/probe_rom_size_limit.py \
+  "Pocket Monsters - Leaf Green (Japan).gba" \
+  --out-dir probes \
+  --report rom-size-probe.json
+```
 
 ## Save evidence
 
@@ -57,28 +93,22 @@ The normal slot payload is:
 - allocated section-data capacity per slot: 55552 bytes
 - unused tail capacity: 2212 bytes
 
-The 2212 bytes are **not** phase-1 extension space. Retail checksums use the original per-section sizes. Increasing those sizes would make an untouched old save fail checksum validation unless a legacy migration loader is added first.
+The 2212 bytes are not phase-1 extension space because retail checksums use the original per-section sizes.
 
 ## Safe phase-1 save extension
 
 The source contains already-checksummed unused fields, and the seven active saves were checked byte-for-byte.
 
-Most importantly:
+`SaveBlock2 + 0xB20` is exactly 1024 bytes (`filler_B20[0x400]`) and was all-zero in every supplied active save.
 
-- `SaveBlock2 + 0xB20`
-- length `0x400` = 1024 bytes
-- source field: `filler_B20[0x400]`
-- all 1024 bytes are zero in all seven active saves
-
-This gives an exact phase-1 extended Pokédex layout:
+It is reserved for:
 
 - 4096 seen bits = 512 bytes
 - 4096 owned bits = 512 bytes
-- total = 1024 bytes
 
-The original Gen III seen/owned fields remain in place for compatibility. The extension block stores the expanded range and can mirror the native range where required.
+This provides a 4096-species Pokédex envelope while keeping the physical save at 128 KiB.
 
-Additional verified-zero source fields are reserved but not assigned yet:
+Additional verified-zero fields remain reserved:
 
 - `SaveBlock1 + 0x348C`: 400 bytes
 - `SaveBlock1 + 0x3A94`: 64 bytes
@@ -87,41 +117,29 @@ Additional verified-zero source fields are reserved but not assigned yet:
 
 ## Pokémon entity widths
 
-The retail Pokémon data already stores:
+Retail saved Pokémon already store:
 
 - species as `u16`
 - held item as `u16`
 - four moves as `u16`
 
-So later species, item, and move IDs do not require a larger BoxPokemon structure merely because their IDs exceed Generation III counts.
+The principal blockers are instead:
 
-The real blockers are narrower semantics:
+- one-bit boxed ability selector;
+- `SpeciesInfo.abilities[2]` using `u8`;
+- `BattlePokemon.ability` using `u8`;
+- 9-bit `LevelUpMove.move`;
+- `BattleMove.effect` using `u8`.
 
-- boxed ability selection is only one bit;
-- `SpeciesInfo.abilities[2]` uses `u8` IDs;
-- `BattlePokemon.ability` is `u8`;
-- `LevelUpMove.move` is a 9-bit packed field;
-- `BattleMove.effect` is `u8`.
-
-326 populated party/storage Pokémon from the supplied saves were decrypted during the audit. Their four-bit retail `unusedRibbons` field was zero in every checked Pokémon, but those bits are **not being repurposed yet**. Ability-slot/form/interoperability migration must be designed separately.
+326 populated Pokémon from the supplied saves were decrypted during the audit. Their retail unused-ribbon nibble was zero in all checked cases, but those bits are not repurposed yet.
 
 ## Tool policy
 
-`tools/expand_rom_capacity.py` now requires both a ROM and a SAV.
-
-It:
-
-1. verifies the 16 MiB ROM hash;
-2. validates the 128 KiB save size;
-3. verifies the two 14-sector main save slots using retail section checksums;
-4. records which slot is active;
-5. records Hall of Fame and Trainer Tower sector occupancy;
-6. leaves the SAV byte-for-byte unchanged;
-7. expands only the ROM to 32 MiB.
-
-Example:
+`tools/expand_rom_capacity.py` requires a ROM and its SAV, verifies the save structure, leaves the SAV byte-for-byte unchanged, and expands only the ROM to **32 MiB**.
 
 ```sh
+python tools/validate_generation_capacity.py
+
 python tools/expand_rom_capacity.py \
   "Pocket Monsters - Leaf Green (Japan).gba" \
   "Pocket Monsters - Leaf Green (Japan).sav" \
@@ -130,12 +148,10 @@ python tools/expand_rom_capacity.py \
 
 ## Next binary work
 
-The next phase is not form change.
-
 1. implement the 4096-species extended Pokédex block in the existing 0x400-byte SaveBlock2 filler;
-2. inventory every species/move/item/ability/type/evolution table and every pointer to those tables in each regional ROM;
-3. relocate large append-only tables into the upper 16 MiB;
-4. replace the 9-bit level-up move encoding before modern move IDs are imported;
+2. inventory every species/move/item/ability/type/evolution table and every pointer in each regional ROM;
+3. pack and relocate large append-only tables inside the **32 MiB hard limit**;
+4. replace the 9-bit level-up move encoding;
 5. widen ability/effect runtime paths where needed;
-6. preserve 128 KiB save compatibility and both rotating main slots;
-7. only after this layer is stable, return to form-change mechanics.
+6. preserve the 128 KiB save and both rotating slots;
+7. only then resume form-change mechanics.
