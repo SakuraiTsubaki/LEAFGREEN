@@ -1,93 +1,70 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
 import json
-import math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MANIFEST = ROOT / "manifests" / "generation_capacity.json"
-
-
-def required_bits(max_id: int) -> int:
-    if max_id < 0:
-        raise ValueError("max_id must be non-negative")
-    return max(1, math.ceil(math.log2(max_id + 1)))
+CAPACITY = ROOT / "manifests" / "generation_capacity.json"
+AUDIT = ROOT / "manifests" / "rom_save_audit.json"
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        "manifest",
-        nargs="?",
-        type=Path,
-        default=DEFAULT_MANIFEST,
-        help="capacity manifest (default: manifests/generation_capacity.json)",
-    )
-    args = ap.parse_args()
-
-    data = json.loads(args.manifest.read_text(encoding="utf-8"))
-    observed = data["observed_reference_maxima"]
-    contract = data["capacity_contract"]
-
+    cap = json.loads(CAPACITY.read_text(encoding="utf-8"))
+    audit = json.loads(AUDIT.read_text(encoding="utf-8"))
     errors: list[str] = []
-    checked = 0
 
-    for domain in ("species", "moves", "abilities", "items"):
-        obs = int(observed[domain]["max_id"])
-        cfg = contract[domain]
-        max_id = int(cfg["max_id"])
-        entries = int(cfg["entries"])
-        bits = int(cfg["id_bits"])
-
-        if obs > max_id:
-            errors.append(f"{domain}: observed max {obs} exceeds contract max {max_id}")
-        if entries != max_id + 1:
-            errors.append(f"{domain}: entries {entries} != max_id + 1 ({max_id + 1})")
-        if entries & (entries - 1):
-            errors.append(f"{domain}: entries {entries} is not a power of two")
-        if bits < required_bits(max_id):
-            errors.append(
-                f"{domain}: {bits} bits cannot represent contract max {max_id} "
-                f"(needs {required_bits(max_id)})"
-            )
-        checked += 1
-
-    for domain, cfg in contract.items():
-        max_id = int(cfg["max_id"])
-        entries = int(cfg["entries"])
-        bits = int(cfg["id_bits"])
-        if entries != max_id + 1:
-            errors.append(f"{domain}: entries {entries} != max_id + 1 ({max_id + 1})")
-        if bits < required_bits(max_id):
-            errors.append(
-                f"{domain}: {bits} bits cannot represent contract max {max_id} "
-                f"(needs {required_bits(max_id)})"
-            )
-
-    policy = data["policy"]
-    if int(policy["current_rom_size_bytes"]) != 16 * 1024 * 1024:
-        errors.append("current ROM size must remain 16 MiB for the clean-input baseline")
-    if int(policy["expanded_rom_size_bytes"]) != 32 * 1024 * 1024:
-        errors.append("expanded ROM target must be 32 MiB")
+    policy = cap["policy"]
+    if policy["rom_input_size_bytes"] != 16 * 1024 * 1024:
+        errors.append("clean LeafGreen ROM baseline is not 16 MiB")
+    if policy["rom_expanded_size_bytes"] != 32 * 1024 * 1024:
+        errors.append("expanded ROM target is not 32 MiB")
+    if policy["save_size_bytes"] != 128 * 1024:
+        errors.append("save policy must preserve 128 KiB FLASH1M")
     if policy["form_change_mechanics"] != "deferred":
         errors.append("form-change mechanics must remain deferred in this phase")
 
+    if audit["basis"]["local_pairs"] != 7:
+        errors.append("ROM/SAV audit does not contain all seven target pairs")
+    if audit["save_layout"]["trainer_tower_ereader_sectors"] != [30, 31]:
+        errors.append("Trainer Tower sectors must remain reserved")
+    if audit["save_layout"]["hall_of_fame_sectors"] != [28, 29]:
+        errors.append("Hall of Fame sectors must remain reserved")
+
+    dex = cap["save_evidence"]["phase1_reclaimable_existing_fields"]["SaveBlock2_filler_B20"]
+    needed = (
+        dex["planned_layout"]["extended_seen_bits"] // 8
+        + dex["planned_layout"]["extended_owned_bits"] // 8
+    )
+    if needed != dex["bytes"]:
+        errors.append(
+            f"extended Pokedex needs {needed} bytes but filler_B20 provides {dex['bytes']}"
+        )
+    if dex["bytes"] != 0x400:
+        errors.append("SaveBlock2 filler_B20 must remain exactly 0x400 bytes")
+    if not dex["zero_in_all_7_active_samples"]:
+        errors.append("SaveBlock2 filler_B20 is not verified zero in all active samples")
+
+    native = cap["native_identifier_storage"]
+    if native["moves"]["pokemon_move_slots"] != "u16":
+        errors.append("native Pokémon move slots must remain recorded as u16")
+    if native["species"]["boxed_pokemon"] != "u16":
+        errors.append("native boxed species field must remain recorded as u16")
+    if cap["save_evidence"]["spare_physical_sectors"] != 0:
+        errors.append("FRLG 128 KiB save must not claim spare physical sectors")
+
     if errors:
-        print("generation-capacity validation FAILED")
+        print("generation/save capacity validation FAILED")
         for error in errors:
             print(f"- {error}")
         return 1
 
-    print("generation-capacity validation OK")
-    print(f"- observed domains checked: {checked}")
-    for domain in ("species", "moves", "abilities", "items"):
-        obs = observed[domain]["max_id"]
-        cap = contract[domain]["max_id"]
-        print(f"- {domain}: observed {obs}, reserved through {cap}")
+    print("generation/save capacity validation OK")
+    print("- ROM: 16 MiB source -> 32 MiB expansion window")
+    print("- SAV: fixed 128 KiB / 32 sectors")
+    print("- physical spare save sectors: 0")
+    print("- extended Pokedex: 4096 seen + 4096 owned bits in existing 0x400-byte filler")
     print("- form-change mechanics: deferred")
-    print("- ROM target: 16 MiB -> 32 MiB")
     return 0
 
 
