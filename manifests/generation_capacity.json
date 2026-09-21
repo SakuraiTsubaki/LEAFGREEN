@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "purpose": "Generation 10 readiness derived from the actual LeafGreen ROM/SAV pairs before form-change work.",
   "policy": {
     "form_change_mechanics": "deferred",
@@ -7,6 +7,9 @@
     "extension_ids": "append-only",
     "rom_input_size_bytes": 16777216,
     "rom_expanded_size_bytes": 33554432,
+    "rom_hard_limit_bytes": 33554432,
+    "rom_hard_limit_mib": 32,
+    "oversize_rom_files": "probe-only; not uniquely addressable without a nonstandard mapper/banking design",
     "save_size_bytes": 131072,
     "save_physical_size_policy": "preserve 128 KiB FLASH1M layout"
   },
@@ -15,7 +18,12 @@
       "repository": "pret/pokefirered",
       "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788"
     },
-    "pair_audit": "manifests/rom_save_audit.json"
+    "pair_audit": "manifests/rom_save_audit.json",
+    "rom_size_probe": "manifests/rom_size_limit_probe.json",
+    "mgba_reference": {
+      "repository": "mgba-emu/mgba",
+      "commit": "3a5bc24629867576b0fb576a5d5a21d3b3d6b576"
+    }
   },
   "rom_evidence": {
     "verified_pairs": 7,
@@ -23,18 +31,50 @@
     "all_contain_flash_signature": "FLASH1M_V103",
     "linker_rom_window": {
       "origin": "0x08000000",
-      "length": "32M"
+      "length": "32M",
+      "last_unique_address": "0x09FFFFFF"
+    },
+    "waitstate_windows": {
+      "ROM0": "0x08000000..0x09FFFFFF",
+      "ROM1": "0x0A000000..0x0BFFFFFF",
+      "ROM2": "0x0C000000..0x0DFFFFFF",
+      "semantics": "ROM1 and ROM2 address the same 32 MiB ROM data with different waitstates; they are not extra storage"
     },
     "common_all_ff_ranges_inside_original_16m": [
-      ["0x719B88", "0xC00000"],
-      ["0xEB244C", "0xF00000"],
-      ["0xFDFFFF", "0x1000000"]
+      [
+        "0x719B88",
+        "0xC00000"
+      ],
+      [
+        "0xEB244C",
+        "0xF00000"
+      ],
+      [
+        "0xFDFFFF",
+        "0x1000000"
+      ]
     ],
     "expanded_half": {
-      "file_range": ["0x1000000", "0x2000000"],
-      "rom_address_range": ["0x09000000", "0x0A000000"],
+      "file_range": [
+        "0x1000000",
+        "0x2000000"
+      ],
+      "rom_address_range": [
+        "0x09000000",
+        "0x0A000000"
+      ],
       "initial_fill": "0xFF",
       "use": "relocated data tables and assets; code placement requires branch/range review"
+    },
+    "oversize_probe": {
+      "tested_file_sizes_mib": [
+        32,
+        64,
+        96,
+        128
+      ],
+      "maximum_unique_standard_storage_mib": 32,
+      "result": "64/96/128 MiB files can be constructed, but bytes after 32 MiB are outside the standard LeafGreen/GBA unique ROM window"
     }
   },
   "save_evidence": {
@@ -135,9 +175,10 @@
   },
   "phase1_order": [
     "validate every ROM together with its 128 KiB save",
+    "enforce the 32 MiB standard LeafGreen/GBA hard ROM limit",
     "keep the save physical size at 128 KiB",
     "reserve SaveBlock2 filler_B20 as the 4096-species extended seen/owned Pokedex block",
-    "inventory and relocate species/move/item/ability/type/evolution tables into the 32 MiB ROM space",
+    "inventory and relocate species/move/item/ability/type/evolution tables inside the 32 MiB ROM window",
     "replace the 9-bit level-up move encoding before importing move IDs above 511",
     "design ability-slot widening without changing BoxPokemon size or breaking old saves",
     "only after the expansion layer is stable, resume form-change mechanics"
