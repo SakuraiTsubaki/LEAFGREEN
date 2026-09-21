@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-09-21",
+  "basis": {
+    "local_pairs": 7,
+    "source_reference": {
+      "repository": "pret/pokefirered",
+      "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788"
+    },
+    "rom_size_bytes": 16777216,
+    "save_size_bytes": 131072,
+    "save_flash_signature_in_all_roms": "FLASH1M_V103",
+    "sector_size": 4096,
+    "sector_data_size": 3968,
+    "sector_count": 32
+  },
+  "rom_common_all_ff_ranges": [
+    {"start": "0x719B88", "end_exclusive": "0xC00000", "bytes": 5137528},
+    {"start": "0xEB244C", "end_exclusive": "0xF00000", "bytes": 318388},
+    {"start": "0xFDFFFF", "end_exclusive": "0x1000000", "bytes": 131073}
+  ],
+  "save_layout": {
+    "main_slot_1_sectors": "0..13",
+    "main_slot_2_sectors": "14..27",
+    "hall_of_fame_sectors": [28, 29],
+    "trainer_tower_ereader_sectors": [30, 31],
+    "main_slot_capacity_bytes": 55552,
+    "main_slot_payload_bytes": 53340,
+    "main_slot_tail_slack_bytes": 2212,
+    "tail_slack_policy": "Do not consume by merely increasing section sizes: legacy saves were checksummed using the original per-section sizes and need an explicit migration loader."
+  },
+  "native_save_struct_sizes": {
+    "SaveBlock2": 3876,
+    "SaveBlock1": 15720,
+    "PokemonStorage": 33744
+  },
+  "validated_unused_in_struct_regions": [
+    {
+      "block": "SaveBlock2",
+      "source_name": "filler_B20",
+      "range": "0x0B20..0x0F1F",
+      "bytes": 1024,
+      "all_zero_in_all_7_active_saves": true,
+      "planned_use": "extended Pokedex: 4096 seen bits + 4096 owned bits = 512 + 512 bytes"
+    },
+    {
+      "block": "SaveBlock1",
+      "source_name": "unused_348C",
+      "range": "0x348C..0x361B",
+      "bytes": 400,
+      "all_zero_in_all_7_active_saves": true
+    },
+    {
+      "block": "SaveBlock1",
+      "source_name": "unused_3A94",
+      "range": "0x3A94..0x3AD3",
+      "bytes": 64,
+      "all_zero_in_all_7_active_saves": true
+    },
+    {
+      "block": "SaveBlock1",
+      "source_name": "unused_3D24",
+      "range": "0x3D24..0x3D33",
+      "bytes": 16,
+      "all_zero_in_all_7_active_saves": true
+    },
+    {
+      "block": "SaveBlock1",
+      "source_name": "unused_632",
+      "range": "0x0632..0x0637",
+      "bytes": 6,
+      "all_zero_in_all_7_active_saves": true
+    }
+  ],
+  "pokemon_entity": {
+    "species_storage": "u16",
+    "held_item_storage": "u16",
+    "move_storage": "u16[4]",
+    "ability_selector": "1 bit",
+    "populated_party_or_box_pokemon_decrypted_and_checked": 326,
+    "unused_ribbon_nibble_nonzero_count": 0,
+    "policy": "Do not repurpose BoxPokemon bits yet. Ability/form/interoperability migration gets its own audited phase."
+  },
+  "pairs": [
+    {
+      "region": "Japan",
+      "game_code": "BPGJ",
+      "revision": 0,
+      "rom_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
+      "save_sha256": "33e1007cb3d6229fec60b95aba0d92ef8067117123f7c2bdce74bd5eed93fc75",
+      "active_slot": 0,
+      "active_counter": 356,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "USA",
+      "game_code": "BPGE",
+      "revision": 0,
+      "rom_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
+      "save_sha256": "ba52f44f8756e67d521203217a2b42459aeadd6644bc8d4d3a9772824edc8494",
+      "active_slot": 1,
+      "active_counter": 357,
+      "hall_of_fame_nonzero": true,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "Europe Rev 1",
+      "game_code": "BPGE",
+      "revision": 1,
+      "rom_sha256": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
+      "save_sha256": "810830a841d39c83b5a46298bec10e1a9d4d2abfc266154118c56825a4e2df9e",
+      "active_slot": 1,
+      "active_counter": 359,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "Germany",
+      "game_code": "BPGD",
+      "revision": 0,
+      "rom_sha256": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
+      "save_sha256": "1cbe3d397537919e30f941cd152f8aab08c1ef31d1616ae94d9b789def43817b",
+      "active_slot": 1,
+      "active_counter": 357,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "France",
+      "game_code": "BPGF",
+      "revision": 0,
+      "rom_sha256": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
+      "save_sha256": "db312f1b0738a04726362a8a4e46e17b91c7efb6e17c487c646da2f846f54bf4",
+      "active_slot": 0,
+      "active_counter": 358,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "Italy",
+      "game_code": "BPGI",
+      "revision": 0,
+      "rom_sha256": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
+      "save_sha256": "a85fd06748a8a7fd17bac00581bfc00abb94f95b10b5f7188b6bc9fce686fe82",
+      "active_slot": 1,
+      "active_counter": 359,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    },
+    {
+      "region": "Spain",
+      "game_code": "BPGS",
+      "revision": 0,
+      "rom_sha256": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
+      "save_sha256": "da766fac6d0d0088c287358d53a85716e0c018f5eaabbf4b6f935fb307392239",
+      "active_slot": 0,
+      "active_counter": 358,
+      "hall_of_fame_nonzero": false,
+      "trainer_tower_nonzero": false
+    }
+  ]
+}
