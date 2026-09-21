@@ -1,42 +1,70 @@
 # LEAFGREEN
 
-Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries are not stored in this repository.
+Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries and save binaries are not stored in this repository.
 
-## Generation 10 readiness — expansion first
+## Generation 10 readiness — ROM + SAV first
 
-**Form-change mechanics are deferred.** The current priority is engine/data capacity so LeafGreen can accept later-generation content without redesigning its identifier space again when Generation 10 data arrives.
+**Form-change mechanics are deferred.** Expansion work is based on the actual seven LeafGreen ROM/SAV pairs.
 
-The first expansion layer is now defined and testable:
+Current verified foundation:
 
-- `manifests/generation_capacity.json` — append-only capacity contract and current reference ceilings.
-- `tools/validate_generation_capacity.py` — validates reserved ID ranges, bit widths, ROM target size, and the form-change defer rule.
-- `tools/expand_rom_capacity.py` — expands a verified clean or external-events-patched LeafGreen ROM from 16 MiB to 32 MiB while preserving the original 16 MiB byte-for-byte.
-- `docs/generation-10-readiness.md` — native width blockers and the table-relocation order.
+- seven clean ROMs: 16 MiB each;
+- seven saves: 128 KiB each;
+- every ROM contains `FLASH1M_V103`;
+- save sectors 0..27 are the two rotating main slots;
+- sectors 28..29 are Hall of Fame;
+- sectors 30..31 are Trainer Tower/e-Reader;
+- there are no spare physical save sectors;
+- ROM expansion target: 32 MiB;
+- save physical size: remains 128 KiB.
 
-Reserved ceilings are Species `0..4095`, Moves `0..2047`, Abilities `0..1023`, Items `0..8191`, Types `0..31`, Move Effects `0..1023`, and Evolution Methods `0..511`. A local form index range `0..255` is reserved only; form-change behavior is not implemented in this phase.
+See `manifests/rom_save_audit.json` and `docs/generation-10-readiness.md`.
 
-Physical ROM expansion only reserves the upper 16 MiB. Gameplay tables are **not yet** relocated there. The next engine work is the 9-bit level-up move encoding, 8-bit ability/effect paths, table pointer fan-out, and expanded Pokédex/save storage.
+### Extended Pokédex space
+
+The seven active saves were reconstructed and checked. `SaveBlock2` field `filler_B20[0x400]` is 1024 bytes and is all-zero in every sample.
+
+Phase 1 reserves this existing checksummed field for:
+
+- 4096 seen bits = 512 bytes;
+- 4096 owned bits = 512 bytes.
+
+This gives a 4096-species Pokédex envelope **without enlarging the 128 KiB save file or stealing Hall of Fame / Trainer Tower sectors**.
+
+Species, held-item and move IDs inside stored Pokémon are already `u16`. The immediate blockers are the 9-bit level-up move encoding, 8-bit ability/effect runtime paths, and the one-bit boxed ability selector.
+
+## ROM expansion tool
+
+`tools/expand_rom_capacity.py` now requires a ROM **and its SAV**. It validates the save-sector/checksum structure before expanding the ROM.
+
+The SAV is never modified by this tool.
+
+```bash
+python tools/validate_generation_capacity.py
+
+python tools/expand_rom_capacity.py \
+  "Pocket Monsters - Leaf Green (Japan).gba" \
+  "Pocket Monsters - Leaf Green (Japan).sav" \
+  --report leafgreen-rom-save-expansion.json
+```
+
+The 16 MiB ROM prefix is preserved byte-for-byte and the new upper 16 MiB starts as `0xFF`.
 
 ## Emerald item-parameter baseline
 
-All item gameplay parameters are standardized against **Pokémon Emerald** across the full
-canonical item range **0..376**. This applies to every item, not only event tickets.
+All item gameplay parameters are standardized against **Pokémon Emerald** across the full canonical item range **0..376**. This applies to every item, not only event tickets.
 
-See `manifests/emerald_item_parameters.json` and `docs/emerald-item-parameters.md`.
-LeafGreen-specific bag containers and code addresses are treated as engine adapters so Emerald
-semantics are preserved without copying invalid raw pointers or enum values.
+See `manifests/emerald_item_parameters.json` and `docs/emerald-item-parameters.md`. LeafGreen-specific bag containers and code addresses are engine adapters; Emerald semantics are preserved without copying invalid raw pointers or enum values.
 
 ## Always-on external event content
 
 Current ROM patch policy:
 
-- **MysticTicket / Navel Rock** — a permanent Mystery Gift Deliveryman NPC is added to Pallet Town. Talking to him gives the real MysticTicket if it is missing and sets the same ship/received flags as the original distribution.
-- **AuroraTicket / Birth Island** — the same Pallet Town NPC gives the real AuroraTicket if it is missing and sets the original distribution flags.
-- **Original story logic stays intact** — the Vermilion ferry ticket checks are no longer forced or rewritten. The player simply owns the legitimate Key Items from the beginning area; ordinary Sevii / Rainbow Pass progression still controls when the relevant ferry menu is reachable.
-- **Altering Cave** — all nine programmed selector tables are replaced by one permanent merged encounter table, removing the unreleased Wonder Spot dependency.
-- **Save compatibility** — no save-format change. Existing and new saves use the ROM-side behavior.
-
-The added NPC uses the game's existing **Mystery Gift Deliveryman** overworld graphic and the standard localized item-obtain routine, so Japanese, English, German, French, Italian and Spanish ROMs display their own native item names/messages without new translated text.
+- **MysticTicket / Navel Rock** — a permanent Mystery Gift Deliveryman NPC is added to Pallet Town and gives the real ticket when missing.
+- **AuroraTicket / Birth Island** — the same NPC gives the real ticket when missing.
+- **Original story logic stays intact** — normal Sevii / Rainbow Pass progression still controls ferry access.
+- **Altering Cave** — all nine programmed selector tables are replaced by one permanent merged encounter table.
+- **Save compatibility** — no save-format enlargement.
 
 Supported clean ROMs: Japanese, USA, Europe Rev 1, German, French, Italian and Spanish LeafGreen.
 
@@ -48,26 +76,17 @@ Trainer Tower e-Reader data remains a separate external-data workstream:
 - `tools/extract_trainer_tower_cards.py`
 - `docs/trainer-tower-ereader.md`
 
-The ticket-NPC change does not alter these files or Trainer Tower save sectors.
+Save sectors 30 and 31 remain reserved for this system.
 
-## Files
+## Key files
 
-- `tools/expand_rom_capacity.py` — signature-checked 16 MiB -> 32 MiB physical ROM expander.
-- `tools/validate_generation_capacity.py` — Generation 10 readiness capacity validator.
-- `manifests/generation_capacity.json` — reserved identifier/table ceilings and native blockers.
-- `docs/generation-10-readiness.md` — expansion-first architecture and implementation order.
-- `tools/patch_external_events.py` — signature-checked patcher for the seven supported clean ROMs.
-- `patches/` — IPS patches generated from the verified clean ROMs.
-- `manifests/leafgreen_roms.json` — original/patched SHA-256 values and discovered offsets.
-- `docs/external-events.md` — event policy and technical rationale.
-- `checksums/SHA256SUMS.txt` — repository artifact hashes.
+- `manifests/rom_save_audit.json` — seven real ROM/SAV pair audit.
+- `manifests/generation_capacity.json` — evidence-based expansion constraints.
+- `tools/validate_generation_capacity.py` — validates the ROM/save expansion policy.
+- `tools/expand_rom_capacity.py` — validates ROM + SAV, then expands only the ROM to 32 MiB.
+- `docs/generation-10-readiness.md` — save-compatible expansion design.
+- `tools/patch_external_events.py` — external-event ROM patcher.
+- `manifests/leafgreen_roms.json` — original/patched ROM SHA-256 and offsets.
+- `patches/` — generated IPS patches.
 
-## Usage
-
-```bash
-python tools/validate_generation_capacity.py
-python tools/patch_external_events.py "Pocket Monsters - Leaf Green (Japan).gba"
-python tools/expand_rom_capacity.py "Pocket Monsters - Leaf Green (Japan) - Always On External Events.gba" --report leafgreen-32m.json
-```
-
-The patcher and ROM expander refuse unknown inputs. The Generation 10 capacity contract is a foundation target; it does not by itself make later-generation gameplay data available.
+The next implementation target is the extended Pokédex block and table/pointer relocation. Form-change mechanics remain on hold.
