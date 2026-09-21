@@ -7,11 +7,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CAPACITY = ROOT / "manifests" / "generation_capacity.json"
 AUDIT = ROOT / "manifests" / "rom_save_audit.json"
+ROM_LIMIT = ROOT / "manifests" / "rom_size_limit_probe.json"
 
 
 def main() -> int:
     cap = json.loads(CAPACITY.read_text(encoding="utf-8"))
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
+    limit = json.loads(ROM_LIMIT.read_text(encoding="utf-8"))
     errors: list[str] = []
 
     policy = cap["policy"]
@@ -19,6 +21,12 @@ def main() -> int:
         errors.append("clean LeafGreen ROM baseline is not 16 MiB")
     if policy["rom_expanded_size_bytes"] != 32 * 1024 * 1024:
         errors.append("expanded ROM target is not 32 MiB")
+    if policy["rom_hard_limit_bytes"] != 32 * 1024 * 1024:
+        errors.append("standard LeafGreen/GBA hard ROM limit must be 32 MiB")
+    if policy["rom_hard_limit_mib"] != 32:
+        errors.append("standard LeafGreen/GBA hard ROM limit must be 32 MiB")
+    if limit["result"]["maximum_directly_addressable_mib"] != 32:
+        errors.append("ROM-size probe no longer agrees with the 32 MiB hard limit")
     if policy["save_size_bytes"] != 128 * 1024:
         errors.append("save policy must preserve 128 KiB FLASH1M")
     if policy["form_change_mechanics"] != "deferred":
@@ -60,7 +68,9 @@ def main() -> int:
         return 1
 
     print("generation/save capacity validation OK")
-    print("- ROM: 16 MiB source -> 32 MiB expansion window")
+    print("- ROM source: 16 MiB")
+    print("- ROM standard hard limit: 32 MiB")
+    print("- 64/96/128 MiB files: probe-only without a custom mapper")
     print("- SAV: fixed 128 KiB / 32 sectors")
     print("- physical spare save sectors: 0")
     print("- extended Pokedex: 4096 seen + 4096 owned bits in existing 0x400-byte filler")
