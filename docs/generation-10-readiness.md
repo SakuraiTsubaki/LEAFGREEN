@@ -1,110 +1,141 @@
-# Generation 10 readiness: expansion before form changes
+# Generation 10 readiness from real LeafGreen ROM/SAV pairs
 
 ## Decision
 
-Form-change mechanics are deferred.
+Form-change mechanics remain deferred.
 
-The first priority is to make LeafGreen structurally capable of accepting later-generation data without having to redesign the identifier space again when Generation 10 data arrives. This phase does **not** claim that modern species, moves, abilities, items, or forms are already playable.
+Generation expansion is based on the seven supplied LeafGreen ROM/SAV pairs, not on capacity guesses. The project keeps the retail 128 KiB FLASH1M save layout and expands the ROM to the 32 MiB address window already declared by the pinned `pret/pokefirered` linker scripts.
 
-The work is split into two layers:
+Evidence is recorded in:
 
-1. **physical ROM capacity** — expand a verified 16 MiB LeafGreen image to 32 MiB while preserving the original 16 MiB byte-for-byte;
-2. **engine/data capacity** — reserve stable append-only ID spaces and audit every native table/field that must be relocated or widened.
+- `manifests/rom_save_audit.json`
+- `manifests/generation_capacity.json`
 
-## Reference ceiling
+## ROM evidence
 
-The capacity contract is pinned in `manifests/generation_capacity.json`.
+All seven clean ROMs are exactly 16 MiB and contain `FLASH1M_V103`.
 
-The current normalized PKHeX reference already reaches:
+The seven-ROM byte comparison found these common all-`0xFF` ranges inside the original 16 MiB:
 
-- species ID 1025 — Pecharunt;
-- move ID 920 — Nihil Light;
-- ability ID 310 — Poison Puppeteer;
-- item ID 2684 in the currently pinned Z-A / Mega Dimension reference ceiling.
+- `0x719B88..0xBFFFFF`
+- `0xEB244C..0xEFFFFF`
+- `0xFDFFFF..0xFFFFFF`
 
-These are reference maxima, not LeafGreen-native limits and not predictions for Generation 10.
+The current external-event patch already uses a small part of the first common region at `0x800000`, so future large tables should not assume the original free space is untouched.
 
-## Reserved capacity
+The pinned linker scripts define:
 
-The project reserves deliberately larger power-of-two spaces:
+- ROM origin: `0x08000000`
+- ROM length: `32M`
 
-| Domain | Reserved IDs | Entries | Required ID width |
-| --- | ---: | ---: | ---: |
-| Species | 0..4095 | 4096 | 16-bit |
-| Moves | 0..2047 | 2048 | 16-bit |
-| Abilities | 0..1023 | 1024 | 16-bit |
-| Items | 0..8191 | 8192 | 16-bit |
-| Types | 0..31 | 32 | 8-bit |
-| Move effects | 0..1023 | 1024 | 16-bit |
-| Evolution methods | 0..511 | 512 | 16-bit |
-| Local form index | 0..255 | 256 | 8-bit, reserved only |
+Therefore the physical expansion target is 32 MiB. The new upper half is initially `0xFF`:
 
-Existing FRLG/Emerald-compatible IDs remain stable. New IDs are append-only.
+- file offsets: `0x1000000..0x1FFFFFF`
+- ROM addresses: `0x09000000..0x09FFFFFF`
 
-## Native LeafGreen blockers
+Relocated data tables and assets should prefer this upper half. Code placed there still requires ARM/Thumb branch-range review or veneers; 32 MiB space alone does not make every direct branch valid.
 
-The pinned `pret/pokefirered` reference shows that several important identifiers already use 16-bit storage:
+## Save evidence
 
-- boxed Pokémon species: `u16`;
-- held item: `u16`;
-- moves: `u16`;
-- battle species/item/moves: `u16`;
-- evolution method/parameter/target species: `u16`.
+Every supplied save is exactly 128 KiB.
 
-Those paths do not need a new fundamental ID type merely to exceed the Generation III counts.
+Retail FRLG divides the 32 flash sectors as follows:
 
-The first hard blockers are narrower fields and packed encodings:
+- sectors 0..13 — main save slot 1
+- sectors 14..27 — main save slot 2
+- sectors 28..29 — Hall of Fame
+- sectors 30..31 — Trainer Tower / e-Reader
 
+There are therefore **no spare physical save sectors**. Empty Trainer Tower sectors in a sample save are still reserved and must not be stolen for expansion.
+
+The normal slot payload is:
+
+- `SaveBlock2`: 0xF24 = 3876 bytes
+- `SaveBlock1`: 0x3D68 = 15720 bytes
+- `PokemonStorage`: 0x83D0 = 33744 bytes
+- total payload per slot: 53340 bytes
+- allocated section-data capacity per slot: 55552 bytes
+- unused tail capacity: 2212 bytes
+
+The 2212 bytes are **not** phase-1 extension space. Retail checksums use the original per-section sizes. Increasing those sizes would make an untouched old save fail checksum validation unless a legacy migration loader is added first.
+
+## Safe phase-1 save extension
+
+The source contains already-checksummed unused fields, and the seven active saves were checked byte-for-byte.
+
+Most importantly:
+
+- `SaveBlock2 + 0xB20`
+- length `0x400` = 1024 bytes
+- source field: `filler_B20[0x400]`
+- all 1024 bytes are zero in all seven active saves
+
+This gives an exact phase-1 extended Pokédex layout:
+
+- 4096 seen bits = 512 bytes
+- 4096 owned bits = 512 bytes
+- total = 1024 bytes
+
+The original Gen III seen/owned fields remain in place for compatibility. The extension block stores the expanded range and can mirror the native range where required.
+
+Additional verified-zero source fields are reserved but not assigned yet:
+
+- `SaveBlock1 + 0x348C`: 400 bytes
+- `SaveBlock1 + 0x3A94`: 64 bytes
+- `SaveBlock1 + 0x3D24`: 16 bytes
+- `SaveBlock1 + 0x0632`: 6 bytes
+
+## Pokémon entity widths
+
+The retail Pokémon data already stores:
+
+- species as `u16`
+- held item as `u16`
+- four moves as `u16`
+
+So later species, item, and move IDs do not require a larger BoxPokemon structure merely because their IDs exceed Generation III counts.
+
+The real blockers are narrower semantics:
+
+- boxed ability selection is only one bit;
+- `SpeciesInfo.abilities[2]` uses `u8` IDs;
 - `BattlePokemon.ability` is `u8`;
-- `SpeciesInfo.abilities[2]` stores ability IDs as `u8`;
-- boxed Pokémon stores only a one-bit `abilityNum`, which selects two native ability slots;
-- `BattleMove.effect` is `u8`;
-- `LevelUpMove.move` is a 9-bit field, so it cannot represent move IDs above 511;
-- Pokédex seen/caught bitfields scale from `NUM_SPECIES` and therefore require a save-layout strategy once the species table is expanded.
+- `LevelUpMove.move` is a 9-bit packed field;
+- `BattleMove.effect` is `u8`.
 
-These must be solved before importing modern data at the reserved ceilings.
+326 populated party/storage Pokémon from the supplied saves were decrypted during the audit. Their four-bit retail `unusedRibbons` field was zero in every checked Pokémon, but those bits are **not being repurposed yet**. Ability-slot/form/interoperability migration must be designed separately.
 
-## Physical ROM expansion
+## Tool policy
 
-`tools/expand_rom_capacity.py` expands any verified clean LeafGreen ROM, or a verified 16 MiB output from `tools/patch_external_events.py`, to 32 MiB.
+`tools/expand_rom_capacity.py` now requires both a ROM and a SAV.
 
-The tool:
+It:
 
-- verifies the lower 16 MiB by SHA-256;
-- preserves those bytes exactly;
-- fills file offsets `0x1000000..0x1FFFFFF` with `0xFF`;
-- refuses a 32 MiB input if the expansion region already contains data;
-- records the new ROM-address range as `0x09000000..0x09FFFFFF`.
+1. verifies the 16 MiB ROM hash;
+2. validates the 128 KiB save size;
+3. verifies the two 14-sector main save slots using retail section checksums;
+4. records which slot is active;
+5. records Hall of Fame and Trainer Tower sector occupancy;
+6. leaves the SAV byte-for-byte unchanged;
+7. expands only the ROM to 32 MiB.
 
-This is only space reservation. No gameplay table is relocated by this step.
-
-Recommended order for the current tools:
-
-1. start from a verified clean 16 MiB ROM;
-2. apply `tools/patch_external_events.py` if the external-event patch is wanted;
-3. run `tools/expand_rom_capacity.py`;
-4. later generation-table relocation patches may use the new upper 16 MiB.
-
-## Expansion order
-
-The next implementation work should proceed in this order:
-
-1. inventory all species-, move-, ability-, item-, type-, evolution-, learnset-, graphics-, cry-, Pokédex-, and save-related tables;
-2. replace the 9-bit level-up move encoding;
-3. widen ability IDs and move-effect IDs to 16-bit runtime paths;
-4. relocate append-only tables into the upper 16 MiB;
-5. expand species/move/item/ability name and description tables;
-6. expand Pokédex/save bitfields with an explicit backward-compatibility plan;
-7. import later-generation data;
-8. only after this foundation is stable, resume form-change mechanics.
-
-## Validation
-
-Run:
+Example:
 
 ```sh
-python tools/validate_generation_capacity.py
-python tools/expand_rom_capacity.py "Pokemon - Leaf Green Version (USA).gba" --report leafgreen-32m.json
+python tools/expand_rom_capacity.py \
+  "Pocket Monsters - Leaf Green (Japan).gba" \
+  "Pocket Monsters - Leaf Green (Japan).sav" \
+  --report leafgreen-rom-save-expansion.json
 ```
 
-`validate_generation_capacity.py` fails if a pinned observed maximum exceeds the reserved contract, if a capacity does not fit its declared bit width, or if this phase accidentally stops marking form-change mechanics as deferred.
+## Next binary work
+
+The next phase is not form change.
+
+1. implement the 4096-species extended Pokédex block in the existing 0x400-byte SaveBlock2 filler;
+2. inventory every species/move/item/ability/type/evolution table and every pointer to those tables in each regional ROM;
+3. relocate large append-only tables into the upper 16 MiB;
+4. replace the 9-bit level-up move encoding before modern move IDs are imported;
+5. widen ability/effect runtime paths where needed;
+6. preserve 128 KiB save compatibility and both rotating main slots;
+7. only after this layer is stable, return to form-change mechanics.
