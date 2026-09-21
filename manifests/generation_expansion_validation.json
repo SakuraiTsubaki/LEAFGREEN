@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-09-21",
+  "tool": "tools/expand_rom_capacity.py",
+  "scope": "seven verified clean LeafGreen ROMs",
+  "checks": [
+    "input SHA-256 matches manifests/leafgreen_roms.json",
+    "input size is 16 MiB",
+    "output size is 32 MiB",
+    "output prefix exactly matches the entire 16 MiB input",
+    "new upper 16 MiB is entirely 0xFF"
+  ],
+  "results": [
+    {
+      "file": "Pocket Monsters - Leaf Green (Japan).gba",
+      "input_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
+      "output_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Leaf Green Version (USA).gba",
+      "input_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
+      "output_32m_sha256": "60ee5f649183b87eb37c63a419afdde3f364cc028cc6995f189d74ea981fd56d",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Leaf Green Version (Europe) (Rev 1).gba",
+      "input_sha256": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
+      "output_32m_sha256": "08854b6702e2dcf67a2de12568d55899e179f633950e2f188cc08501c8df61d2",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Blattgruene Edition (Germany).gba",
+      "input_sha256": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
+      "output_32m_sha256": "8446ce466062a791560c3ead31bfa812f7788da319bd4cf98fffa812407042d5",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Version Vert Feuille (France).gba",
+      "input_sha256": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
+      "output_32m_sha256": "a02d41283ea0b98a62d1005dbe0321d23173a9d753ab9e8ddee56d15a794ffaa",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Versione Verde Foglia (Italy).gba",
+      "input_sha256": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
+      "output_32m_sha256": "3cdac2087f642ca846d3a4f3802689f8484ad9426ea27f7519d3ddc7b2bd4a62",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    },
+    {
+      "file": "Pokemon - Edicion Verde Hoja (Spain).gba",
+      "input_sha256": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
+      "output_32m_sha256": "e15e650133dcb851a1f04d6a8dad45ce39ed602abb586bdba36d63a0c238aebc",
+      "input_size": 16777216,
+      "output_size": 33554432,
+      "prefix_preserved": true,
+      "expanded_region_all_ff": true
+    }
+  ]
+}
