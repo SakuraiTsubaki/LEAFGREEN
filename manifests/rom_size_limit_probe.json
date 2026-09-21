@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-09-21",
+  "subject": "Maximum directly addressable ROM size for standard LeafGreen/GBA mapping",
+  "result": {
+    "maximum_directly_addressable_mib": 32,
+    "maximum_directly_addressable_bytes": 33554432,
+    "file_offset_range": ["0x0000000", "0x2000000"],
+    "cpu_address_range": ["0x08000000", "0x0A000000"],
+    "last_unique_cpu_address": "0x09FFFFFF",
+    "leafgreen_policy": "32 MiB is the hard ROM-size limit unless a nonstandard mapper/banking system is deliberately introduced"
+  },
+  "evidence": {
+    "pret_pokefirered": {
+      "repository": "pret/pokefirered",
+      "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788",
+      "file": "ld_script.ld",
+      "rom_origin": "0x08000000",
+      "rom_length": "32M"
+    },
+    "mgba": {
+      "repository": "mgba-emu/mgba",
+      "commit": "3a5bc24629867576b0fb576a5d5a21d3b3d6b576",
+      "memory_file": "include/mgba/internal/gba/memory.h",
+      "loader_file": "src/gba/gba.c",
+      "access_file": "src/gba/memory.c",
+      "GBA_SIZE_ROM0": "0x02000000",
+      "rom0": "0x08000000..0x09FFFFFF",
+      "rom1": "0x0A000000..0x0BFFFFFF",
+      "rom2": "0x0C000000..0x0DFFFFFF",
+      "mapping_semantics": "ROM0/ROM1/ROM2 all index the same ROM buffer with a 32 MiB mask; ROM1 and ROM2 are waitstate windows, not additional unique storage",
+      "oversize_loader_semantics": "for ordinary non-Matrix GBA ROMs larger than 32 MiB, only GBA_SIZE_ROM0 bytes are mapped and pristineRomSize is clamped to 32 MiB"
+    }
+  },
+  "local_probe": {
+    "source": "Pocket Monsters - Leaf Green (Japan).gba",
+    "source_16m_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
+    "method": "preserve original 16 MiB and fill the remainder with 0xFF",
+    "results": [
+      {
+        "size_mib": 32,
+        "size_bytes": 33554432,
+        "sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+        "first_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+        "unique_standard_gba_storage": true
+      },
+      {
+        "size_mib": 64,
+        "size_bytes": 67108864,
+        "sha256": "c702f23be5bbb26e88ba8dd8fc93082c00a7f65eef5b72a6ce6d16ba6bfceda5",
+        "first_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+        "bytes_after_32m_all_ff": true,
+        "unique_standard_gba_storage": false
+      },
+      {
+        "size_mib": 96,
+        "size_bytes": 100663296,
+        "sha256": "42d16d0115c7830d65e55bddb1a4ca22832a106c16bade5b5a010a8684f9cde3",
+        "first_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+        "bytes_after_32m_all_ff": true,
+        "unique_standard_gba_storage": false
+      },
+      {
+        "size_mib": 128,
+        "size_bytes": 134217728,
+        "sha256": "8ab9e608cdcfad54d595f5383632b1e2e06cc2e8ef78c4154ffe03c4881c6e3f",
+        "first_32m_sha256": "4bc90376e9a5bafcc5e9f7569d07e560ad340965937fd2c0048463f16037064d",
+        "bytes_after_32m_all_ff": true,
+        "unique_standard_gba_storage": false
+      }
+    ]
+  },
+  "nonstandard_extension": {
+    "status": "out of scope for standard LeafGreen",
+    "requirement": "custom mapper/bank switching plus emulator/flashcart support",
+    "save_policy": "still independent; the 128 KiB FLASH1M save decision does not become larger merely because a custom ROM mapper is introduced"
+  }
+}
