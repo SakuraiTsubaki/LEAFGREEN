@@ -66,6 +66,14 @@ The seven-profile inventory is `manifests/core_table_inventory.csv`. Example off
 
 Absolute addresses are profile-specific and must never be reused across regions/revisions.
 
+### First actual upper-ROM relocation
+
+`abilityNames` is the first table moved by the binary expansion path. Across all seven supported profiles it has exactly four verified base-pointer sites and no aligned interior-reference candidates.
+
+`tools/relocate_ability_names.py` copies the 1,014-byte table to file `0x010029D8` / ROM `0x090029D8`, preserves the original table, rewrites only the four verified pointer words, and verifies the relocated bytes and pointer counts.
+
+Static validation is complete for all seven ROM/SAV pairs (`manifests/ability_names_relocation_validation.json`). Emulator runtime smoke testing is still pending.
+
 ## ROM expansion tools
 
 `tools/expand_rom_capacity.py` requires both the ROM and its SAV. It validates the save-sector/checksum structure before expanding the ROM, and it never changes the SAV.
