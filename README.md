@@ -2,9 +2,21 @@
 
 Pokémon LeafGreen ROM research and reproducible patch tooling. ROM binaries and save binaries are not stored in this repository.
 
-## Generation 10 readiness — ROM + SAV first
+## Generation 10 readiness — source adapter + ROM/SAV first
 
 **Form-change mechanics are deferred.** Expansion work is based on the actual seven LeafGreen ROM/SAV pairs.
+
+LEAFGREEN is now connected to the Generation III superset coordinated by `SakuraiTsubaki/EMERALD`.
+The pinned modern runtime is `rh-hideout/pokeemerald-expansion@75b806a3ab57a81ff1eb6179288981f0b3cc3050`.
+Current content remains Gen 9, Generation 10 is reserved, behavior remains `GEN_9`, and speculative Gen 10 content is forbidden.
+
+The retail source adapter is now reproducible:
+
+- `tools/extract_leafgreen_core_tables.py` parses the Game Freak ROM header at file offset `0x100`;
+- `manifests/core_table_inventory.csv` records seven separate regional/revision profiles;
+- species/ability/item/move/name table addresses are taken from each ROM instead of copied across regions;
+- the evolution table is located from a source-derived binary prefix and is marked for instruction/literal-pool relocation review.
+
 
 ### Verified maximum ROM size: 32 MiB
 
@@ -36,6 +48,23 @@ All seven supplied saves are 128 KiB FLASH1M saves.
 - 4096 owned bits = 512 bytes.
 
 See `manifests/rom_save_audit.json`, `manifests/generation_capacity.json`, and `docs/generation-10-readiness.md`.
+
+### Japanese save evidence
+
+The Japanese BPGJ ROM GFRomHeader reports `SaveBlock1 = 0x3D40`, while the supplied newest Japanese SAV slot (counter 356) validates its section-4 checksum only with a `0x3D68` span.
+Both observations are preserved. `tools/expand_rom_capacity.py` tests the ROM-header size and the observed compatibility span instead of silently normalizing one into the other.
+
+## Retail core-table source adapter
+
+The seven-profile inventory is `manifests/core_table_inventory.csv`. Example offsets:
+
+| Profile | Species info | Items | Moves | Evolution |
+| --- | ---: | ---: | ---: | ---: |
+| Japan BPGJ | `0x211168` | `0x3A0568` | `0x20D5E8` | `0x216164` |
+| USA BPGE Rev 0 | `0x254760` | `0x3DAE64` | `0x250BE0` | `0x25975C` |
+| Europe BPGE Rev 1 | `0x2547D0` | `0x3DAED4` | `0x250C50` | `0x2597CC` |
+
+Absolute addresses are profile-specific and must never be reused across regions/revisions.
 
 ## ROM expansion tools
 
