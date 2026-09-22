@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Validate a LeafGreen ROM/SAV pair, then expand the ROM to 32 MiB.
 
-The save remains 128 KiB and is never rewritten by this tool. Expansion is
-allowed only after the supplied save passes the vanilla FRLG 32-sector layout
-checks. This keeps ROM growth and save-format decisions coupled to real data.
+The save remains 128 KiB and is never rewritten. Validation keeps the ROM's
+GFRomHeader SaveBlock sizes separate from the checksum span actually observed
+in the supplied SAV. This matters for BPGJ: its GFRomHeader reports SaveBlock1
+0x3D40 while the supplied newest save slot validates with a 0x3D68 checksum
+span.
 """
 from __future__ import annotations
 
@@ -23,19 +25,16 @@ SECTOR_SIGNATURE = 0x08012025
 SAVE_SIZE = 0x20000
 ROM_SIZE = 0x1000000
 EXPANDED_ROM_SIZE = 0x2000000
-
-# pret/pokefirered@c75f... sizes:
-# SaveBlock2 0xF24; SaveBlock1 0x3D68; PokemonStorage 0x83D0.
-SECTION_DATA_SIZES = [
-    0xF24,
-    0xF80, 0xF80, 0xF80, 0x3D68 - 3 * 0xF80,
-    0xF80, 0xF80, 0xF80, 0xF80, 0xF80, 0xF80, 0xF80, 0xF80,
-    0x83D0 - 8 * 0xF80,
-]
+POKEMON_STORAGE_SIZE = 0x83D0
+GF_HEADER_OFFSET = 0x100
 
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def u32(data: bytes, offset: int) -> int:
+    return struct.unpack_from("<I", data, offset)[0]
 
 
 def calc_checksum(data: bytes, size: int) -> int:
@@ -43,6 +42,28 @@ def calc_checksum(data: bytes, size: int) -> int:
     for offset in range(0, size // 4 * 4, 4):
         total = (total + int.from_bytes(data[offset:offset + 4], "little")) & 0xFFFFFFFF
     return ((total >> 16) + total) & 0xFFFF
+
+
+def section_sizes(save_block_2_size: int, save_block_1_size: int) -> list[int]:
+    if save_block_2_size > SECTOR_DATA_SIZE:
+        raise ValueError("SaveBlock2 exceeds one sector")
+
+    save_block_1_last = save_block_1_size - 3 * SECTOR_DATA_SIZE
+    storage_last = POKEMON_STORAGE_SIZE - 8 * SECTOR_DATA_SIZE
+    if not 0 < save_block_1_last <= SECTOR_DATA_SIZE:
+        raise ValueError(f"invalid SaveBlock1 size 0x{save_block_1_size:X}")
+    if not 0 < storage_last <= SECTOR_DATA_SIZE:
+        raise ValueError("invalid PokemonStorage size")
+
+    return [
+        save_block_2_size,
+        SECTOR_DATA_SIZE,
+        SECTOR_DATA_SIZE,
+        SECTOR_DATA_SIZE,
+        save_block_1_last,
+        *([SECTOR_DATA_SIZE] * 8),
+        storage_last,
+    ]
 
 
 def load_supported_rom_hashes() -> dict[str, str]:
@@ -54,21 +75,21 @@ def load_supported_rom_hashes() -> dict[str, str]:
     return supported
 
 
-def validate_save_slot(data: bytes, slot: int) -> dict:
-    base_sector = slot * 14
+def validate_slot_with_profile(data: bytes, slot: int, sizes: list[int]) -> dict:
     ids: set[int] = set()
     counters: list[int] = []
     sectors = []
 
-    for physical in range(base_sector, base_sector + 14):
+    for physical in range(slot * 14, slot * 14 + 14):
         sector = data[physical * SECTOR_SIZE:(physical + 1) * SECTOR_SIZE]
-        section_id, checksum = struct.unpack_from("<HH", sector, 0xFF4)
+        section_id, stored_checksum = struct.unpack_from("<HH", sector, 0xFF4)
         signature, counter = struct.unpack_from("<II", sector, 0xFF8)
 
+        expected_checksum = None
         checksum_ok = False
         if 0 <= section_id < 14 and signature == SECTOR_SIGNATURE:
-            expected = calc_checksum(sector[:SECTOR_DATA_SIZE], SECTION_DATA_SIZES[section_id])
-            checksum_ok = checksum == expected
+            expected_checksum = calc_checksum(sector[:SECTOR_DATA_SIZE], sizes[section_id])
+            checksum_ok = stored_checksum == expected_checksum
             if checksum_ok:
                 ids.add(section_id)
                 counters.append(counter)
@@ -78,21 +99,54 @@ def validate_save_slot(data: bytes, slot: int) -> dict:
             "section_id": section_id,
             "signature_ok": signature == SECTOR_SIGNATURE,
             "checksum_ok": checksum_ok,
+            "stored_checksum": stored_checksum,
+            "expected_checksum": expected_checksum,
             "counter": counter,
         })
 
-    full = ids == set(range(14)) and len(counters) == 14 and len(set(counters)) == 1
+    valid = ids == set(range(14)) and len(counters) == 14 and len(set(counters)) == 1
     return {
-        "slot": slot,
-        "valid": full,
-        "counter": counters[0] if full else None,
-        "valid_section_ids": sorted(ids),
+        "valid": valid,
+        "counter": counters[0] if valid else None,
         "sectors": sectors,
     }
 
 
+def validate_save_slot(
+    data: bytes,
+    slot: int,
+    save_block_2_size: int,
+    save_block_1_candidates: list[int],
+) -> dict:
+    matches: list[int] = []
+    profiles: dict[str, dict] = {}
+
+    for save_block_1_size in save_block_1_candidates:
+        key = f"0x{save_block_1_size:X}"
+        result = validate_slot_with_profile(
+            data,
+            slot,
+            section_sizes(save_block_2_size, save_block_1_size),
+        )
+        profiles[key] = result
+        if result["valid"]:
+            matches.append(save_block_1_size)
+
+    counters = {
+        profiles[f"0x{size:X}"]["counter"]
+        for size in matches
+    }
+    return {
+        "slot": slot,
+        "valid": bool(matches),
+        "counter": next(iter(counters)) if len(counters) == 1 else None,
+        "matching_save_block1_checksum_sizes": [f"0x{x:X}" for x in matches],
+        "profiles": profiles,
+    }
+
+
 def choose_active_slot(slots: list[dict]) -> dict:
-    valid = [slot for slot in slots if slot["valid"]]
+    valid = [slot for slot in slots if slot["valid"] and slot["counter"] is not None]
     if not valid:
         raise SystemExit("save has no complete checksum-valid FRLG main slot")
     if len(valid) == 1:
@@ -100,8 +154,6 @@ def choose_active_slot(slots: list[dict]) -> dict:
 
     a, b = valid
     ca, cb = a["counter"], b["counter"]
-
-    # Match the wraparound special case used by the retail loader.
     if (ca == 0xFFFFFFFF and cb == 0) or (ca == 0 and cb == 0xFFFFFFFF):
         return b if ((ca + 1) & 0xFFFFFFFF) < ((cb + 1) & 0xFFFFFFFF) else a
     return b if ca < cb else a
@@ -110,7 +162,7 @@ def choose_active_slot(slots: list[dict]) -> dict:
 def inspect_special_sectors(save: bytes) -> dict:
     def nonzero(index: int) -> bool:
         sector = save[index * SECTOR_SIZE:(index + 1) * SECTOR_SIZE]
-        return any(byte != 0 for byte in sector)
+        return any(sector)
 
     return {
         "hall_of_fame": {
@@ -131,8 +183,7 @@ def main() -> int:
     ap.add_argument("rom", type=Path)
     ap.add_argument("save", type=Path)
     ap.add_argument("-o", "--output", type=Path)
-    ap.add_argument("--save-copy", type=Path,
-                    help="optional byte-identical copy of the validated 128 KiB save")
+    ap.add_argument("--save-copy", type=Path)
     ap.add_argument("--report", type=Path)
     args = ap.parse_args()
 
@@ -140,13 +191,9 @@ def main() -> int:
     save = args.save.read_bytes()
 
     if len(save) != SAVE_SIZE:
-        raise SystemExit(f"unsupported save size: {len(save)} bytes (expected {SAVE_SIZE})")
-
+        raise SystemExit(f"unsupported save size: {len(save)} bytes")
     if len(rom) not in (ROM_SIZE, EXPANDED_ROM_SIZE):
-        raise SystemExit(
-            f"unsupported ROM size: {len(rom)} bytes "
-            f"(expected {ROM_SIZE} or {EXPANDED_ROM_SIZE})"
-        )
+        raise SystemExit(f"unsupported ROM size: {len(rom)} bytes")
     if rom[0xAC:0xAF] != b"BPG":
         raise SystemExit("not a Pokémon LeafGreen BPG* ROM")
 
@@ -156,18 +203,28 @@ def main() -> int:
     if base_digest not in supported:
         raise SystemExit(f"unsupported 16 MiB ROM base SHA-256: {base_digest}")
 
-    slots = [validate_save_slot(save, 0), validate_save_slot(save, 1)]
+    save_block_2_size = u32(lower, GF_HEADER_OFFSET + 0x88)
+    save_block_1_header_size = u32(lower, GF_HEADER_OFFSET + 0x8C)
+
+    candidates: list[int] = []
+    for size in (save_block_1_header_size, 0x3D68):
+        if size not in candidates:
+            candidates.append(size)
+
+    slots = [
+        validate_save_slot(save, slot, save_block_2_size, candidates)
+        for slot in range(2)
+    ]
     active = choose_active_slot(slots)
     special = inspect_special_sectors(save)
 
-    # 32 MiB is the ROM window used by the pinned pokefirered linker scripts.
     if len(rom) == ROM_SIZE:
         expanded = rom + b"\xFF" * ROM_SIZE
         already_expanded = False
     else:
         if rom[ROM_SIZE:] != b"\xFF" * ROM_SIZE:
             raise SystemExit(
-                "32 MiB input already contains data in the expansion half; "
+                "32 MiB input already contains data in expansion half; "
                 "refusing to overwrite it"
             )
         expanded = rom
@@ -187,6 +244,11 @@ def main() -> int:
             "revision": lower[0xBC],
             "input_size": len(rom),
             "base_16m_sha256": base_digest,
+            "gf_rom_header": {
+                "offset": "0x100",
+                "save_block_2_size": f"0x{save_block_2_size:X}",
+                "save_block_1_size": f"0x{save_block_1_header_size:X}",
+            },
             "output": str(output),
             "output_size": len(expanded),
             "output_sha256": sha256(expanded),
@@ -204,11 +266,19 @@ def main() -> int:
             "size": len(save),
             "sha256": sha256(save),
             "modified": False,
+            "checksum_save_block1_candidates_tested": [
+                f"0x{x:X}" for x in candidates
+            ],
             "slots": slots,
             "active_slot": active["slot"],
             "active_counter": active["counter"],
+            "active_slot_matching_save_block1_checksum_sizes":
+                active["matching_save_block1_checksum_sizes"],
             "special_sectors": special,
-            "policy": "keep physical save at 128 KiB; use audited in-struct unused fields before any checksum-layout migration",
+            "policy": (
+                "preserve 128 KiB save; keep ROM-header structure sizes "
+                "separate from observed SAV checksum spans"
+            ),
         },
         "form_change_mechanics": "deferred",
         "gameplay_tables_relocated": False,
