@@ -34,13 +34,22 @@
     "original_rom_bytes": 16777216,
     "expanded_rom_bytes": 33554432,
     "standard_rom_hard_limit_bytes": 33554432,
-    "save_bytes": 131072
+    "save_bytes": 131072,
+    "core_table_reference_audit": "manifests/core_table_reference_audit.csv",
+    "relocation_plan": "manifests/retail_core_relocation_plan.json",
+    "first_relocation_validation": "manifests/ability_names_relocation_validation.json"
   },
   "save_policy": {
     "physical_flash_bytes": 131072,
     "sectors": 32,
-    "preserve_hall_of_fame_sectors": [28, 29],
-    "preserve_trainer_tower_ereader_sectors": [30, 31],
+    "preserve_hall_of_fame_sectors": [
+      28,
+      29
+    ],
+    "preserve_trainer_tower_ereader_sectors": [
+      30,
+      31
+    ],
     "spare_physical_sectors": 0,
     "japan_rom_header_saveblock1_size": "0x3D40",
     "japan_supplied_active_save_checksum_span": "0x3D68",
@@ -60,8 +69,16 @@
     "rom_save_pair_validation": "complete for seven supplied pairs",
     "standard_32_mib_limit_validation": "complete",
     "gen10_slot_connection": "complete through Generation III superset contract",
-    "core_table_relocation": "not yet applied",
+    "core_table_relocation": "abilityNames statically relocated for all seven profiles; emulator runtime smoke test pending",
     "extended_pokedex_runtime_hooks": "not yet implemented",
-    "generation_10_content": "not available and not invented"
+    "generation_10_content": "not available and not invented",
+    "ability_names_relocation": {
+      "tool": "tools/relocate_ability_names.py",
+      "target_file_offset": "0x010029D8",
+      "target_rom_address": "0x090029D8",
+      "bytes": 1014,
+      "static_validation": "complete for seven supplied ROM/SAV pairs",
+      "runtime_emulator_tested": false
+    }
   }
 }
