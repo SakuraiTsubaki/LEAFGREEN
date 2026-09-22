@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-09-23",
+  "tool": "tools/relocate_ability_names.py",
+  "purpose": "First conservative core-table relocation into the upper 16 MiB.",
+  "target": {
+    "file_offset": "0x010029D8",
+    "rom_address": "0x090029D8",
+    "bytes": 1014
+  },
+  "safety_conditions": [
+    "all seven source ROM/SAV pairs validate",
+    "abilityNames has four exact base-pointer sites in every profile",
+    "one pointer is GFRomHeader offset 0x1C0",
+    "each of the other three pointer words has exactly one Thumb LDR-literal consumer",
+    "aligned interior-reference count is zero in all seven profiles",
+    "source ability-name table remains in place as a compatibility fallback",
+    "relocated bytes are byte-identical",
+    "old pointer value has zero occurrences after rewrite",
+    "new pointer value occurs at exactly the four verified sites"
+  ],
+  "runtime_emulator_tested": false,
+  "results": [
+    {
+      "profile": "Japan BPGJ Rev 0",
+      "source_offset": "0x0020C250",
+      "pointer_offsets": ["0x000001C0", "0x000D8FE8", "0x000D9648", "0x00136F60"],
+      "output_sha256": "de343e5d82bc3c3641c3cee04f357e7a0f3ede64f0263751be9d5dc834f6d526"
+    },
+    {
+      "profile": "USA BPGE Rev 0",
+      "source_offset": "0x0024FC1C",
+      "pointer_offsets": ["0x000001C0", "0x000D7FD8", "0x000D85F8", "0x00136778"],
+      "output_sha256": "771fc3951d031d37b66d00bf6e0348772c95ccdc0112b1ac4563fe932486d8fa"
+    },
+    {
+      "profile": "Europe BPGE Rev 1",
+      "source_offset": "0x0024FC8C",
+      "pointer_offsets": ["0x000001C0", "0x000D7FEC", "0x000D860C", "0x001367F0"],
+      "output_sha256": "1c2c20c516e3dc170102a706031de37d20bea872809cd76891a031dd758fe1b7"
+    },
+    {
+      "profile": "Germany BPGD Rev 0",
+      "source_offset": "0x0024FB40",
+      "pointer_offsets": ["0x000001C0", "0x000D8210", "0x000D8814", "0x00136814"],
+      "output_sha256": "4d7faf6756dbcf1a2ddc83e15d7edaff39f130a40e887d1628d73836c627bc29"
+    },
+    {
+      "profile": "France BPGF Rev 0",
+      "source_offset": "0x0024A06C",
+      "pointer_offsets": ["0x000001C0", "0x000D82D0", "0x000D88D4", "0x001368D0"],
+      "output_sha256": "4df636038fc5fe32a86b33c5027b1b1af38da62bd9d5d52dc463e6a8d8b5dcaa"
+    },
+    {
+      "profile": "Italy BPGI Rev 0",
+      "source_offset": "0x00248CFC",
+      "pointer_offsets": ["0x000001C0", "0x000D8210", "0x000D8814", "0x00136854"],
+      "output_sha256": "146e3979919f501ab149a4a1db04406c194fc6438dfee72a898dbc47deae4adc"
+    },
+    {
+      "profile": "Spain BPGS Rev 0",
+      "source_offset": "0x0024B3E4",
+      "pointer_offsets": ["0x000001C0", "0x000D82F8", "0x000D88FC", "0x00136940"],
+      "output_sha256": "89a392d5c9067ed51040eb6f1b864272d8f89b7f149bbec695f0cd39ab431cd1"
+    }
+  ]
+}
