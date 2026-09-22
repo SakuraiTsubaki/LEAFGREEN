@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,9 +13,20 @@ READINESS = ROOT / "manifests" / "future-generation-readiness.json"
 CAPACITY = ROOT / "manifests" / "generation_capacity.json"
 AUDIT = ROOT / "manifests" / "rom_save_audit.json"
 INVENTORY = ROOT / "manifests" / "core_table_inventory.csv"
+REFERENCE_AUDIT = ROOT / "manifests" / "core_table_reference_audit.csv"
 ROM_LIMIT = ROOT / "manifests" / "rom_size_limit_probe.json"
 
 EXPECTED_EXPANSION_REF = "75b806a3ab57a81ff1eb6179288981f0b3cc3050"
+EXPECTED_TABLES = {
+    "speciesInfo",
+    "abilityNames",
+    "abilityDescriptions",
+    "items",
+    "moves",
+    "monSpeciesNames",
+    "moveNames",
+    "evolutionTable",
+}
 
 
 def fail(message: str) -> None:
@@ -63,6 +75,8 @@ def main() -> int:
         fail("capacity manifest lost the Generation 10 reservation")
     if policy["form_change_mechanics"] != "deferred":
         fail("capacity manifest unexpectedly enables form changes")
+    if policy["speculative_generation_10_content"]:
+        fail("capacity manifest must not invent Generation 10 content")
 
     if rom_limit["result"]["maximum_directly_addressable_mib"] != 32:
         fail("ROM-size probe no longer agrees with 32 MiB hard limit")
@@ -110,12 +124,27 @@ def main() -> int:
         if len({row[field] for row in rows}) != 7:
             fail(f"{field}: per-profile relocation evidence unexpectedly collapsed")
 
-    if any(int(row["species_info_ref_count"]) <= 0 for row in rows):
-        fail("species-info absolute pointer references were not inventoried")
-    if any(int(row["items_ref_count"]) <= 0 for row in rows):
-        fail("item-table absolute pointer references were not inventoried")
-    if any(int(row["moves_ref_count"]) <= 0 for row in rows):
-        fail("move-table absolute pointer references were not inventoried")
+    with REFERENCE_AUDIT.open(newline="", encoding="utf-8") as f:
+        refs = list(csv.DictReader(f))
+    if len(refs) != 7 * len(EXPECTED_TABLES):
+        fail(f"expected 56 table-reference rows, got {len(refs)}")
+    if {row["table"] for row in refs} != EXPECTED_TABLES:
+        fail("reference audit table set changed")
+    per_file = Counter(row["file"] for row in refs)
+    if any(count != len(EXPECTED_TABLES) for count in per_file.values()) or len(per_file) != 7:
+        fail("reference audit does not contain eight tables for every source ROM")
+
+    evolution = [row for row in refs if row["table"] == "evolutionTable"]
+    if any(int(row["base_reference_count"]) != 0 for row in evolution):
+        fail("evolution table unexpectedly gained a simple base-pointer reference")
+    if any(int(row["interior_reference_count"]) <= 0 for row in evolution):
+        fail("evolution relocation risk evidence disappeared")
+
+    ability_names = [row for row in refs if row["table"] == "abilityNames"]
+    if any(int(row["base_reference_count"]) <= 0 for row in ability_names):
+        fail("ability-name base references were not found")
+    if any(int(row["interior_reference_count"]) != 0 for row in ability_names):
+        fail("ability-name table gained interior reference candidates; review relocation policy")
 
     print("LEAFGREEN future-generation readiness verified")
     print("  source profiles       : 7")
@@ -127,6 +156,8 @@ def main() -> int:
     print("  save flash            : 128 KiB / 32 sectors")
     print("  modern-core pin       :", EXPECTED_EXPANSION_REF)
     print("  core table inventory  : region/revision-specific")
+    print("  reference audit       : 56 table/profile rows")
+    print("  evolution relocation  : instruction/literal review required")
     print("  Japanese save warning : header 0x3D40 / supplied active checksum 0x3D68")
     return 0
 
