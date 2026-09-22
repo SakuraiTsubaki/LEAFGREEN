@@ -1,0 +1,15 @@
+name: Future generation readiness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify LEAFGREEN Generation 10 readiness
+        run: python tools/verify_future_generation_readiness.py
