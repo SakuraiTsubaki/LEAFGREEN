@@ -17,49 +17,57 @@ def main() -> int:
     errors: list[str] = []
 
     policy = cap["policy"]
-    if policy["rom_input_size_bytes"] != 16 * 1024 * 1024:
-        errors.append("clean LeafGreen ROM baseline is not 16 MiB")
-    if policy["rom_expanded_size_bytes"] != 32 * 1024 * 1024:
-        errors.append("expanded ROM target is not 32 MiB")
-    if policy["rom_hard_limit_bytes"] != 32 * 1024 * 1024:
-        errors.append("standard LeafGreen/GBA hard ROM limit must be 32 MiB")
-    if policy["rom_hard_limit_mib"] != 32:
-        errors.append("standard LeafGreen/GBA hard ROM limit must be 32 MiB")
-    if limit["result"]["maximum_directly_addressable_mib"] != 32:
-        errors.append("ROM-size probe no longer agrees with the 32 MiB hard limit")
-    if policy["save_size_bytes"] != 128 * 1024:
-        errors.append("save policy must preserve 128 KiB FLASH1M")
+    expected = {
+        "current_content_generation": 9,
+        "reserved_generation": 10,
+        "current_behavior_generation": "GEN_9",
+        "rom_input_size_bytes": 16 * 1024 * 1024,
+        "rom_expanded_size_bytes": 32 * 1024 * 1024,
+        "rom_hard_limit_bytes": 32 * 1024 * 1024,
+        "save_size_bytes": 128 * 1024,
+    }
+    for key, value in expected.items():
+        if policy.get(key) != value:
+            errors.append(f"{key}: expected {value!r}, got {policy.get(key)!r}")
+
     if policy["form_change_mechanics"] != "deferred":
-        errors.append("form-change mechanics must remain deferred in this phase")
+        errors.append("form-change mechanics must remain deferred")
+    if policy["speculative_generation_10_content"]:
+        errors.append("speculative Generation 10 content must remain disabled")
+
+    if limit["result"]["maximum_directly_addressable_mib"] != 32:
+        errors.append("ROM-size probe no longer reports a 32 MiB standard hard limit")
 
     if audit["basis"]["local_pairs"] != 7:
-        errors.append("ROM/SAV audit does not contain all seven target pairs")
-    if audit["save_layout"]["trainer_tower_ereader_sectors"] != [30, 31]:
-        errors.append("Trainer Tower sectors must remain reserved")
+        errors.append("ROM/SAV audit must cover all seven supplied profiles")
+    if audit["save_layout"]["spare_physical_sectors"] != 0:
+        errors.append("retail 128 KiB Flash has no spare physical sectors")
     if audit["save_layout"]["hall_of_fame_sectors"] != [28, 29]:
-        errors.append("Hall of Fame sectors must remain reserved")
+        errors.append("Hall of Fame sectors must remain 28-29")
+    if audit["save_layout"]["trainer_tower_ereader_sectors"] != [30, 31]:
+        errors.append("Trainer Tower/e-Reader sectors must remain 30-31")
 
-    dex = cap["save_evidence"]["phase1_reclaimable_existing_fields"]["SaveBlock2_filler_B20"]
-    needed = (
-        dex["planned_layout"]["extended_seen_bits"] // 8
-        + dex["planned_layout"]["extended_owned_bits"] // 8
-    )
-    if needed != dex["bytes"]:
-        errors.append(
-            f"extended Pokedex needs {needed} bytes but filler_B20 provides {dex['bytes']}"
-        )
-    if dex["bytes"] != 0x400:
-        errors.append("SaveBlock2 filler_B20 must remain exactly 0x400 bytes")
-    if not dex["zero_in_all_7_active_samples"]:
-        errors.append("SaveBlock2 filler_B20 is not verified zero in all active samples")
+    japan = audit["observed_save_checksum_profiles"]["Japan_BPGJ_active_slot"]
+    if japan["rom_header_save_block1_size"] != "0x3D40":
+        errors.append("Japanese ROM-header SaveBlock1 evidence must remain 0x3D40")
+    if japan["observed_checksum_save_block1_span"] != "0x3D68":
+        errors.append("supplied Japanese active SAV checksum evidence must remain 0x3D68")
 
-    native = cap["native_identifier_storage"]
-    if native["moves"]["pokemon_move_slots"] != "u16":
-        errors.append("native Pokémon move slots must remain recorded as u16")
-    if native["species"]["boxed_pokemon"] != "u16":
-        errors.append("native boxed species field must remain recorded as u16")
-    if cap["save_evidence"]["spare_physical_sectors"] != 0:
-        errors.append("FRLG 128 KiB save must not claim spare physical sectors")
+    candidate = audit["validated_saveblock2_extension_candidate"]
+    if candidate["bytes"] != 1024:
+        errors.append("SaveBlock2 extension candidate must remain exactly 0x400 bytes")
+    if not candidate["all_zero_in_all_7_active_saves"]:
+        errors.append("SaveBlock2 candidate is not zero in all seven active samples")
+    if candidate["runtime_status"] != (
+        "reserved candidate only; retail ROM read/write hooks are not yet implemented"
+    ):
+        errors.append("SaveBlock2 candidate runtime status changed without review")
+
+    modern = cap["target_modern_core_storage"]
+    if modern["species_bits"] != 11 or modern["move_bits"] != 11:
+        errors.append("modern-core species/move serialized width changed unexpectedly")
+    if modern["held_item_bits"] != 16:
+        errors.append("modern-core held-item width must remain 16 bits")
 
     if errors:
         print("generation/save capacity validation FAILED")
@@ -68,12 +76,13 @@ def main() -> int:
         return 1
 
     print("generation/save capacity validation OK")
-    print("- ROM source: 16 MiB")
-    print("- ROM standard hard limit: 32 MiB")
-    print("- 64/96/128 MiB files: probe-only without a custom mapper")
-    print("- SAV: fixed 128 KiB / 32 sectors")
-    print("- physical spare save sectors: 0")
-    print("- extended Pokedex: 4096 seen + 4096 owned bits in existing 0x400-byte filler")
+    print("- content generation: 9")
+    print("- reserved generation: 10")
+    print("- behavior generation: GEN_9")
+    print("- ROM: 16 MiB source -> 32 MiB standard hard limit")
+    print("- SAV: fixed 128 KiB / 32 sectors / no spare physical sectors")
+    print("- Japanese evidence: ROM header 0x3D40; supplied active SAV checksum 0x3D68")
+    print("- SaveBlock2 0x400 extension area: candidate only, runtime hook pending")
     print("- form-change mechanics: deferred")
     return 0
 
