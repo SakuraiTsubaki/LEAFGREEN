@@ -15,6 +15,7 @@ AUDIT = ROOT / "manifests" / "rom_save_audit.json"
 INVENTORY = ROOT / "manifests" / "core_table_inventory.csv"
 REFERENCE_AUDIT = ROOT / "manifests" / "core_table_reference_audit.csv"
 ROM_LIMIT = ROOT / "manifests" / "rom_size_limit_probe.json"
+ABILITY_RELOCATION = ROOT / "manifests" / "ability_names_relocation_validation.json"
 
 EXPECTED_EXPANSION_REF = "75b806a3ab57a81ff1eb6179288981f0b3cc3050"
 EXPECTED_TABLES = {
@@ -39,6 +40,7 @@ def main() -> int:
     capacity = json.loads(CAPACITY.read_text(encoding="utf-8"))
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
     rom_limit = json.loads(ROM_LIMIT.read_text(encoding="utf-8"))
+    ability_relocation = json.loads(ABILITY_RELOCATION.read_text(encoding="utf-8"))
 
     future = config["futureGeneration"]
     if future["currentContentGeneration"] != 9:
@@ -146,6 +148,32 @@ def main() -> int:
     if any(int(row["interior_reference_count"]) != 0 for row in ability_names):
         fail("ability-name table gained interior reference candidates; review relocation policy")
 
+    relocation_status = ready["status"]["ability_names_relocation"]
+    if relocation_status["target_file_offset"] != "0x010029D8":
+        fail("abilityNames relocation target offset changed")
+    if relocation_status["target_rom_address"] != "0x090029D8":
+        fail("abilityNames relocation target ROM address changed")
+    if relocation_status["bytes"] != 1014:
+        fail("abilityNames relocation byte size changed")
+
+    if ability_relocation["target"] != {
+        "file_offset": "0x010029D8",
+        "rom_address": "0x090029D8",
+        "bytes": 1014,
+    }:
+        fail("abilityNames relocation validation target changed")
+    results = ability_relocation["results"]
+    if len(results) != 7:
+        fail("abilityNames relocation must have seven validated results")
+    if len({row["output_sha256"] for row in results}) != 7:
+        fail("abilityNames relocated output hashes are not unique")
+    for row in results:
+        ptrs = row["pointer_offsets"]
+        if len(ptrs) != 4 or "0x000001C0" not in ptrs:
+            fail(f'{row["profile"]}: expected four verified abilityNames pointer sites including 0x1C0')
+    if ability_relocation["runtime_emulator_tested"]:
+        if not relocation_status["runtime_emulator_tested"]:
+            fail("runtime validation manifests disagree")
     print("LEAFGREEN future-generation readiness verified")
     print("  source profiles       : 7")
     print("  content generation    : 9")
@@ -158,6 +186,7 @@ def main() -> int:
     print("  core table inventory  : region/revision-specific")
     print("  reference audit       : 56 table/profile rows")
     print("  evolution relocation  : instruction/literal review required")
+    print("  abilityNames relocate : 7-profile static validation complete")
     print("  Japanese save warning : header 0x3D40 / supplied active checksum 0x3D68")
     return 0
 
