@@ -4,6 +4,11 @@
 
 Form-change mechanics remain deferred.
 
+LEAFGREEN now participates in the `SakuraiTsubaki/EMERALD` Generation III superset.
+The pinned modern core is `rh-hideout/pokeemerald-expansion@75b806a3ab57a81ff1eb6179288981f0b3cc3050`: Gen 9 content/behavior stays active, a Gen 10 slot is reserved, and no unreleased Gen 10 content is invented.
+
+`tools/extract_leafgreen_core_tables.py` and `manifests/core_table_inventory.csv` provide the seven-profile retail source adapter. Core table addresses are region/revision-specific.
+
 Generation expansion is based on the seven supplied LeafGreen ROM/SAV pairs, not on capacity guesses. The project keeps the retail 128 KiB FLASH1M save layout and expands the ROM only to the maximum standard GBA/LeafGreen directly addressable size: **32 MiB**.
 
 Evidence is recorded in:
@@ -87,11 +92,11 @@ There are therefore **no spare physical save sectors**. Empty Trainer Tower sect
 The normal slot payload is:
 
 - `SaveBlock2`: 0xF24 = 3876 bytes
-- `SaveBlock1`: 0x3D68 = 15720 bytes
+- `SaveBlock1`: BPGJ ROM header `0x3D40`; six international ROM headers `0x3D68`
 - `PokemonStorage`: 0x83D0 = 33744 bytes
-- total payload per slot: 53340 bytes
+- declared payload differs by profile because BPGJ reports a smaller SaveBlock1; see `manifests/rom_save_audit.json`
 - allocated section-data capacity per slot: 55552 bytes
-- unused tail capacity: 2212 bytes
+- the supplied newest BPGJ SAV nevertheless validates its section-4 checksum only with a `0x3D68` span
 
 The 2212 bytes are not phase-1 extension space because retail checksums use the original per-section sizes.
 
