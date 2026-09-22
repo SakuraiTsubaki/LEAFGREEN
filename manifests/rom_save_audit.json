@@ -1,12 +1,13 @@
 {
-  "schema_version": 1,
-  "validated_on": "2026-09-21",
+  "schema_version": 2,
+  "validated_on": "2026-09-23",
   "basis": {
     "local_pairs": 7,
     "source_reference": {
       "repository": "pret/pokefirered",
       "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788"
     },
+    "core_table_inventory": "manifests/core_table_inventory.csv",
     "rom_size_bytes": 16777216,
     "save_size_bytes": 131072,
     "save_flash_signature_in_all_roms": "FLASH1M_V103",
@@ -14,64 +15,54 @@
     "sector_data_size": 3968,
     "sector_count": 32
   },
-  "rom_common_all_ff_ranges": [
-    {"start": "0x719B88", "end_exclusive": "0xC00000", "bytes": 5137528},
-    {"start": "0xEB244C", "end_exclusive": "0xF00000", "bytes": 318388},
-    {"start": "0xFDFFFF", "end_exclusive": "0x1000000", "bytes": 131073}
-  ],
   "save_layout": {
     "main_slot_1_sectors": "0..13",
     "main_slot_2_sectors": "14..27",
     "hall_of_fame_sectors": [28, 29],
     "trainer_tower_ereader_sectors": [30, 31],
     "main_slot_capacity_bytes": 55552,
-    "main_slot_payload_bytes": 53340,
-    "main_slot_tail_slack_bytes": 2212,
-    "tail_slack_policy": "Do not consume by merely increasing section sizes: legacy saves were checksummed using the original per-section sizes and need an explicit migration loader."
+    "spare_physical_sectors": 0
   },
-  "native_save_struct_sizes": {
-    "SaveBlock2": 3876,
-    "SaveBlock1": 15720,
-    "PokemonStorage": 33744
+  "rom_header_save_struct_sizes": {
+    "SaveBlock2": {
+      "all_7_roms": 3876,
+      "hex": "0xF24"
+    },
+    "SaveBlock1": {
+      "Japan_BPGJ": 15680,
+      "Japan_BPGJ_hex": "0x3D40",
+      "international_BPGx": 15720,
+      "international_BPGx_hex": "0x3D68"
+    },
+    "PokemonStorage_reference_size": 33744
   },
-  "validated_unused_in_struct_regions": [
-    {
-      "block": "SaveBlock2",
-      "source_name": "filler_B20",
-      "range": "0x0B20..0x0F1F",
-      "bytes": 1024,
-      "all_zero_in_all_7_active_saves": true,
-      "planned_use": "extended Pokedex: 4096 seen bits + 4096 owned bits = 512 + 512 bytes"
+  "declared_slot_payload": {
+    "Japan_BPGJ_from_rom_header_bytes": 53300,
+    "Japan_BPGJ_from_rom_header_slack_bytes": 2252,
+    "international_from_rom_header_bytes": 53340,
+    "international_from_rom_header_slack_bytes": 2212
+  },
+  "observed_save_checksum_profiles": {
+    "international_active_slots": {
+      "save_block1_checksum_span": "0x3D68",
+      "status": "all six active samples validate"
     },
-    {
-      "block": "SaveBlock1",
-      "source_name": "unused_348C",
-      "range": "0x348C..0x361B",
-      "bytes": 400,
-      "all_zero_in_all_7_active_saves": true
+    "Japan_BPGJ_active_slot": {
+      "rom_header_save_block1_size": "0x3D40",
+      "observed_checksum_save_block1_span": "0x3D68",
+      "active_counter": 356,
+      "status": "the supplied newest Japanese slot validates only with 0x3D68; do not collapse this evidence into the ROM-header value"
     },
-    {
-      "block": "SaveBlock1",
-      "source_name": "unused_3A94",
-      "range": "0x3A94..0x3AD3",
-      "bytes": 64,
-      "all_zero_in_all_7_active_saves": true
-    },
-    {
-      "block": "SaveBlock1",
-      "source_name": "unused_3D24",
-      "range": "0x3D24..0x3D33",
-      "bytes": 16,
-      "all_zero_in_all_7_active_saves": true
-    },
-    {
-      "block": "SaveBlock1",
-      "source_name": "unused_632",
-      "range": "0x0632..0x0637",
-      "bytes": 6,
-      "all_zero_in_all_7_active_saves": true
-    }
-  ],
+    "policy": "ROM-header structure sizes and observed SAV checksum spans are separate evidence. No Japanese save-format rewrite is allowed until the discrepancy is resolved from native binary behavior."
+  },
+  "validated_saveblock2_extension_candidate": {
+    "source_reference_name": "filler_B20",
+    "range": "0x0B20..0x0F1F",
+    "bytes": 1024,
+    "all_zero_in_all_7_active_saves": true,
+    "capacity_candidate": "4096 seen bits + 4096 owned bits = 512 + 512 bytes",
+    "runtime_status": "reserved candidate only; retail ROM read/write hooks are not yet implemented"
+  },
   "pokemon_entity": {
     "species_storage": "u16",
     "held_item_storage": "u16",
@@ -88,8 +79,11 @@
       "revision": 0,
       "rom_sha256": "2957b392dc09fc8df45a660af5493368d7bd378d299862f4cc115998e9da0bf2",
       "save_sha256": "33e1007cb3d6229fec60b95aba0d92ef8067117123f7c2bdce74bd5eed93fc75",
+      "rom_header_saveblock1_size": "0x3D40",
       "active_slot": 0,
       "active_counter": 356,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
+      "inactive_slot_checksum_saveblock1_sizes": ["0x3D40", "0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     },
@@ -99,8 +93,10 @@
       "revision": 0,
       "rom_sha256": "78d310d557ceebc593bd393acc52d1b19a8f023fec40bc200e6063880d8531fc",
       "save_sha256": "ba52f44f8756e67d521203217a2b42459aeadd6644bc8d4d3a9772824edc8494",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 1,
       "active_counter": 357,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": true,
       "trainer_tower_nonzero": false
     },
@@ -110,8 +106,10 @@
       "revision": 1,
       "rom_sha256": "2f978f635b9593f6ca26ec42481c53a6b39f6cddd894ad5c062c1419fac58825",
       "save_sha256": "810830a841d39c83b5a46298bec10e1a9d4d2abfc266154118c56825a4e2df9e",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 1,
       "active_counter": 359,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     },
@@ -121,8 +119,10 @@
       "revision": 0,
       "rom_sha256": "6ab7183caf8bf093f42351cf7c891722ecef85f2ded922f6d2491c6062fa3fc2",
       "save_sha256": "1cbe3d397537919e30f941cd152f8aab08c1ef31d1616ae94d9b789def43817b",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 1,
       "active_counter": 357,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     },
@@ -132,8 +132,10 @@
       "revision": 0,
       "rom_sha256": "cc0fa93f4631d0814afcd5a273edf28f2876e126e8ef0df4dd39dd6f36e53ed3",
       "save_sha256": "db312f1b0738a04726362a8a4e46e17b91c7efb6e17c487c646da2f846f54bf4",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 0,
       "active_counter": 358,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     },
@@ -143,8 +145,10 @@
       "revision": 0,
       "rom_sha256": "c71599a482c43df2104ce6be903393333d3ebacbf392ea5fcd8792dada8a5076",
       "save_sha256": "a85fd06748a8a7fd17bac00581bfc00abb94f95b10b5f7188b6bc9fce686fe82",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 1,
       "active_counter": 359,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     },
@@ -154,8 +158,10 @@
       "revision": 0,
       "rom_sha256": "f8908e0bd32cf27077a26b557e1eea0ff06ce8059bee5dc7d799aab44a070d48",
       "save_sha256": "da766fac6d0d0088c287358d53a85716e0c018f5eaabbf4b6f935fb307392239",
+      "rom_header_saveblock1_size": "0x3D68",
       "active_slot": 0,
       "active_counter": 358,
+      "active_slot_checksum_saveblock1_sizes": ["0x3D68"],
       "hall_of_fame_nonzero": false,
       "trainer_tower_nonzero": false
     }
