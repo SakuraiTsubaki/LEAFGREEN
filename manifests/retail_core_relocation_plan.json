@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "purpose": "Retail core-table relocation staging inside the verified upper 16 MiB arena.",
+  "status": "planning only; no ROM pointer has been rewritten by this manifest",
+  "source_shapes": {
+    "repository": "pret/pokefirered",
+    "commit": "c75f352304d529f6ba92d4f74b9cf8b5c3810788",
+    "reference_audit": "manifests/core_table_reference_audit.csv"
+  },
+  "arena": {
+    "start": "0x01000000",
+    "end_exclusive": "0x02000000",
+    "bytes": 16777216,
+    "cpu_address_start": "0x09000000",
+    "cpu_address_end_exclusive": "0x0A000000"
+  },
+  "allocations": [
+    {
+      "name": "speciesInfo",
+      "size": 10712,
+      "alignment": 4,
+      "file_offset": "0x01000000",
+      "file_end_exclusive": "0x010029D8",
+      "rom_address": "0x09000000",
+      "reference_policy": "base and interior candidates exist; instruction/data classification required"
+    },
+    {
+      "name": "abilityNames",
+      "size": 1014,
+      "alignment": 4,
+      "file_offset": "0x010029D8",
+      "file_end_exclusive": "0x01002DCE",
+      "rom_address": "0x090029D8",
+      "reference_policy": "base references only in all seven profiles; first relocation candidate"
+    },
+    {
+      "name": "abilityDescriptions",
+      "size": 312,
+      "alignment": 4,
+      "file_offset": "0x01002DD0",
+      "file_end_exclusive": "0x01002F08",
+      "rom_address": "0x09002DD0",
+      "reference_policy": "Germany has an interior candidate; classify before rewrite"
+    },
+    {
+      "name": "items",
+      "size": 16500,
+      "alignment": 4,
+      "file_offset": "0x01002F08",
+      "file_end_exclusive": "0x01006F7C",
+      "rom_address": "0x09002F08",
+      "reference_policy": "many interior candidates; instruction/data classification required"
+    },
+    {
+      "name": "moves",
+      "size": 3195,
+      "alignment": 4,
+      "file_offset": "0x01006F7C",
+      "file_end_exclusive": "0x01007BF7",
+      "rom_address": "0x09006F7C",
+      "reference_policy": "base and interior candidates exist"
+    },
+    {
+      "name": "monSpeciesNames",
+      "size": 4532,
+      "alignment": 4,
+      "file_offset": "0x01007BF8",
+      "file_end_exclusive": "0x01008DAC",
+      "rom_address": "0x09007BF8",
+      "reference_policy": "localized interior candidates vary by profile"
+    },
+    {
+      "name": "moveNames",
+      "size": 4615,
+      "alignment": 4,
+      "file_offset": "0x01008DAC",
+      "file_end_exclusive": "0x01009FB3",
+      "rom_address": "0x09008DAC",
+      "reference_policy": "localized interior candidates vary by profile"
+    },
+    {
+      "name": "evolutionTable",
+      "size": 16480,
+      "alignment": 4,
+      "file_offset": "0x01009FB4",
+      "file_end_exclusive": "0x0100E014",
+      "rom_address": "0x09009FB4",
+      "reference_policy": "zero base references and interior candidates in every profile; instruction/literal-pool analysis mandatory"
+    }
+  ],
+  "used_bytes": 57364,
+  "remaining_bytes": 16719852,
+  "next_free_offset": "0x0100E014",
+  "interpretation": "This is only a retail-baseline staging plan. It is not a Generation 10 final budget; future built block sizes must be re-planned from actual data."
+}
