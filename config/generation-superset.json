@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "generation": 3,
   "generationKey": "gen3",
   "sourceProfile": "LEAFGREEN",
@@ -19,6 +19,30 @@
       "generation-superset",
       "source-version-reproduction"
     ]
+  },
+  "futureGeneration": {
+    "currentContentGeneration": 9,
+    "reservedGeneration": 10,
+    "currentBehaviorGeneration": "GEN_9",
+    "formChangeWork": "deferred",
+    "speculativeGeneration10Content": false,
+    "activationRule": "keep GEN_LATEST at GEN_9 until verified Generation 10 rules and data exist",
+    "modernCore": {
+      "coordinatorRepository": "SakuraiTsubaki/EMERALD",
+      "upstreamRepository": "rh-hideout/pokeemerald-expansion",
+      "upstreamRef": "75b806a3ab57a81ff1eb6179288981f0b3cc3050",
+      "readinessManifest": "manifests/future-generation-readiness.yml",
+      "generationSlotPatch": "patches/pokeemerald-expansion/0001-reserve-generation-10-slot.patch"
+    },
+    "leafGreenSourceAdapter": {
+      "coreTableInventory": "manifests/core_table_inventory.csv",
+      "coreTableExtractor": "tools/extract_leafgreen_core_tables.py",
+      "capacityManifest": "manifests/generation_capacity.json",
+      "romSaveAudit": "manifests/rom_save_audit.json",
+      "romSizeProbe": "manifests/rom_size_limit_probe.json",
+      "regionProfiles": 7,
+      "relocationPolicy": "per-profile addresses; never reuse one region's absolute addresses in another region"
+    }
   },
   "romBinariesCommitted": false
 }
